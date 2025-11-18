@@ -35,3 +35,30 @@ class KeepaliveRelayMessage(Message):
     """
     uniq_msg_id: int
     sender_ip: int
+
+@dataclass
+class JoinRequestMessage(Message):
+    """ join request message - the first message client sends to join the chat """
+    uniq_msg_id: int
+    sender_local_time: int
+    sender_nick: str
+
+@dataclass
+class JoinReplyMessage(Message):
+    """ join reply message - informs newly joined client about history and ip:s"""
+    old_message_ids: [int]
+    ip_adresses: [int]
+
+@dataclass
+class OldRequestMessage(Message):
+    """ old request message - message to request message by id """
+    uniq_msg_id: int
+
+@dataclass
+class OldReplyMessage(Message):
+    """ old reply message - reply for old message request """
+    old_msg_type: int
+    old_msg_id: int
+    old_sender_local_time: int
+    old_sender_nick: str
+    old_msg_text: str
