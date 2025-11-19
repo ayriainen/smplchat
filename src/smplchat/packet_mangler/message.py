@@ -12,7 +12,7 @@ class RelayMessage(Message):
     uniq_msg_id: int
     sender_ip: int
     sender_local_time: int
-    old_message_ids: [int]
+    old_message_ids: list[int]
     sender_nick: str
 
 @dataclass
@@ -46,8 +46,8 @@ class JoinRequestMessage(Message):
 @dataclass
 class JoinReplyMessage(Message):
     """ join reply message - informs newly joined client about history and ip:s"""
-    old_message_ids: [int]
-    ip_adresses: [int]
+    old_message_ids: list[int]
+    ip_adresses: list[int]
 
 @dataclass
 class OldRequestMessage(Message):
