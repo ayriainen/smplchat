@@ -26,17 +26,17 @@ def packer(m: Message):
                 f"{len(m.old_message_ids)}Q"
                 f"{len(sender_nick)}s"
                 f"{len(msg_text)}s",
-            m.msg_type,			# B - 1 byte
-            m.uniq_msg_id,		# Q - 8 bytes
-            m.sender_ip,		# L - 4 bytes
-            m.sender_local_time,	# L - 4 bytes
-            len(m.old_message_ids),	# L - 4 bytes
-            len(sender_nick),		# L - 4 bytes
-            len(msg_text),		# L - 4 bytes
+            m.msg_type,					# B - 1 byte
+            m.uniq_msg_id,				# Q - 8 bytes
+            m.sender_ip,				# L - 4 bytes
+            m.sender_local_time,			# L - 4 bytes
+            len(m.old_message_ids),			# L - 4 bytes
+            len(sender_nick),				# L - 4 bytes
+            len(msg_text),				# L - 4 bytes
 
-            *m.old_message_ids,		# ?Q - ? x 8 bytes
-            sender_nick,		# ?s - ? chars (bytes)
-            msg_text)			# ?s - ? * chars
+            *m.old_message_ids,				# ?Q - ? x 8 bytes
+            sender_nick,				# ?s - ? chars (bytes)
+            msg_text)					# ?s - ? * chars
 
     if isinstance(m, (JoinRelayMessage, LeaveRelayMessage)):
         sender_nick = m.sender_nick.encode()
@@ -44,59 +44,69 @@ def packer(m: Message):
             "=BQLLLL"
                 f"{len(m.old_message_ids)}Q"
                 f"{len(sender_nick)}s",
-            m.msg_type,			# B - 1 byte
-            m.uniq_msg_id,		# Q - 8 bytes
-            m.sender_ip,		# L - 4 bytes
-            m.sender_local_time,	# L - 4 bytes
-            len(m.old_message_ids),	# L - 4 bytes
-            len(sender_nick),		# L - 4 bytes
+            m.msg_type,					# B - 1 byte
+            m.uniq_msg_id,				# Q - 8 bytes
+            m.sender_ip,				# L - 4 bytes
+            m.sender_local_time,			# L - 4 bytes
+            len(m.old_message_ids),			# L - 4 bytes
+            len(sender_nick),				# L - 4 bytes
 
-            *m.old_message_ids,		# ?Q - ?x 8 bytes
-            sender_nick)		# ?s - ? chars (bytes)
+            *m.old_message_ids,				# ?Q - ?x 8 bytes
+            sender_nick)				# ?s - ? chars (bytes)
 
     if isinstance(m, KeepaliveRelayMessage):
         return pack(
             "=BQL",
-            m.msg_type,			# B - 1 byte
-            m.uniq_msg_id,		# Q - 8 bytes
-            m.sender_ip)		# L - 4 bytes
+            m.msg_type,					# B - 1 byte
+            m.uniq_msg_id,				# Q - 8 bytes
+            m.sender_ip)				# L - 4 bytes
 
     if isinstance(m, JoinRequestMessage):
         sender_nick = m.sender_nick.encode()
         return pack(
             "=BQLL"
                 f"{len(sender_nick)}s",
-            m.msg_type,			# B - 1 byte
-            m.uniq_msg_id,		# Q - 8 bytes
-            m.sender_local_time,	# L - 4 bytes
-            len(sender_nick),		# L - 4 bytes
+            m.msg_type,					# B - 1 byte
+            m.uniq_msg_id,				# Q - 8 bytes
+            m.sender_local_time,			# L - 4 bytes
+            len(sender_nick),				# L - 4 bytes
 
-            sender_nick)		# ?s - ? chars (bytes)
+            sender_nick)				# ?s - ? chars (bytes)
 
     if isinstance(m, JoinReplyMessage):
         return pack(
-            f"=B100QL{len(m.ip_addresses)}L",
-            m.msg_type,			# B - 1 byte
-            m.old_message_ids,		# 100Q - 100x 8 bytes
-            len(m.ip_addresses),	# L - 4 bytes
-            m.ip_addresses)		# ?L - ? x 4 bytes
+            "=BLL"
+                f"{len(m.old_message_ids)}Q"
+                f"{len(m.ip_addresses)}L",
+            m.msg_type,					# B - 1 byte
+            len(m.old_message_ids),			# L - 4 bytes
+            len(m.ip_addresses),			# L - 4 bytes
+
+            *m.old_message_ids,				# ?Q - ? x 8 bytes
+            *m.ip_addresses)				# ?L - ? x 4 bytes
 
     if isinstance(m, OldRequestMessage):
         return pack(
             "=BQ",
-            m.msg_type,			# B - 1 byte
-            m.uniq_msg_id)		# Q - 8 bytes
+            m.msg_type,					# B - 1 byte
+            m.uniq_msg_id)				# Q - 8 bytes
 
     if isinstance(m, OldReplyMessage):
+        old_sender_nick = m.old_sender_nick.encode()
+        old_msg_text = m.old_msg_text.encode()
         return pack(
-            f"=BBQL32sL{len(m.old_msg_text)}s",
-            m.msg_type,			# B - 1 byte
-            m.old_msg_type,		# B - 1 byte
-            m.old_msg_id,		# Q - 8 bytes
-            m.old_sender_local_time,	# L - 4 bytes
-            m.old_sender_nick,		# 32s - 32 chars (bytes)
-            len(m.old_msg_text),	# L - 4 bytes
-            m.old_msg_text)		# ?s - ? * chars
+            "=BBQLLL"
+                f"{len(old_sender_nick)}s"
+                f"{len(old_msg_text)}s",
+            m.msg_type,					# B - 1 byte
+            m.old_msg_type,				# B - 1 byte
+            m.old_msg_id,				# Q - 8 bytes
+            m.old_sender_local_time,			# L - 4 bytes
+            len(old_sender_nick),			# L - 4 bytes
+            len(old_msg_text),				# L - 4 bytes
+
+            old_sender_nick,				# ?s - ? chars (bytes)
+            old_msg_text)				# ?s - ? * chars
 
     dprint("ERROR: message type not implemented")
     return None
@@ -189,10 +199,57 @@ def unpack_join_request_message(data: bytes):
         sender_nick = sender_nick)
 
 
+def unpack_join_reply_message(data: bytes):
+    """ unpacker for chat relay messages """
+    (msg_type,			# B - 1 byte
+        old_msgs_length,	# L - 4 bytes
+        ip_addrs_length ) = (	# L - 4 bytes
+            unpack_from("=BLL", data) )
+    offset = 9
+
+    old_message_ids = list( unpack_from(
+            f"={old_msgs_length}Q", data, offset=offset) )
+    offset += 8 * old_msgs_length
+
+    ip_addresses = list( unpack_from(
+            f"={ip_addrs_length}L", data, offset=offset) )
+
+    return JoinReplyMessage(
+        msg_type = msg_type,
+        old_message_ids = old_message_ids,
+        ip_addresses = ip_addresses)
+
+
+def unpack_old_reply_message(data: bytes):
+    """ unpacker for chat relay messages """
+    (msg_type,			# B - 1 byte
+        old_msg_type,		# B - 1 byte
+        old_msg_id,		# Q - 8 bytes
+        old_sender_local_time,	# L - 4 bytes
+        old_nick_length,	# L - 4 bytes
+        old_msg_length) = (	# L - 4 bytes
+            unpack_from("=BBQLLL", data) )
+    offset = 22
+
+    old_sender_nick = unpack_from(
+            f"={old_nick_length}s", data, offset=offset)[0].decode()
+    offset += old_nick_length
+
+    old_msg_text = unpack_from(
+            f"={old_msg_length}s", data, offset=offset)[0].decode()
+
+    return OldReplyMessage(
+        msg_type = msg_type,
+        old_msg_type = old_msg_type,
+        old_msg_id = old_msg_id,
+        old_sender_local_time = old_sender_local_time,
+        old_sender_nick = old_sender_nick,
+        old_msg_text = old_msg_text )
+
 
 def unpacker(data: bytes):
     """ unpacker - unpacks messages from raw data """
-    # pylint: disable-msg=too-many-locals, too-many-return-statements
+    # pylint: disable-msg=too-many-return-statements
 
     match unpack_from("=B", data)[0]:	# Unpacks message type
 
@@ -216,16 +273,7 @@ def unpacker(data: bytes):
             return unpack_join_request_message(data)
 
         case MessageType.JOIN_REPLY:
-            ip_list_length = unpack_from("=L", data, offset=801)
-            (msg_type,			# B - 1 byte
-                old_message_ids,	# 100Q - 100x 8 bytes
-                _,			# L - 4 bytes
-                ip_addresses) =	(	# ?L - ? x 4 bytes
-                    unpack(f"=B100QL{ip_list_length}L", data) )
-            return JoinReplyMessage(
-                msg_type = msg_type,
-                old_message_ids = old_message_ids,
-                ip_addresses = ip_addresses)
+            return unpack_join_reply_message(data)
 
         case MessageType.OLD_REQUEST:
             (msg_type,			# B - 1 byte
@@ -236,19 +284,4 @@ def unpacker(data: bytes):
                 uniq_msg_id = uniq_msg_id)
 
         case MessageType.OLD_REPLY:
-            old_msg_length = unpack_from("=L", data, offset=46)
-            ( msg_type,			# B - 1 byte
-            old_msg_type,		# B - 1 byte
-            old_msg_id,			# Q - 8 bytes
-            old_sender_local_time,	# L - 4 bytes
-            old_sender_nick,		# 32s - 32 chars (bytes)
-            _,				# L - 4 bytes
-            old_msg_text ) = (		# ?s - ? * chars
-                unpack(f"=BBQL32sL{old_msg_length}s", data) )
-            return OldReplyMessage(
-                msg_type = msg_type,
-                old_msg_type = old_msg_type,
-                old_msg_id = old_msg_id,
-                old_sender_local_time = old_sender_local_time,
-                old_sender_nick = old_sender_nick,
-                old_msg_text = old_msg_text )
+            return unpack_old_reply_message(data)
