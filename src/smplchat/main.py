@@ -1,4 +1,9 @@
 """ main.py - smplchat """
+import socket
+import time
+
+from src.smplchat import listener, settings
+
 
 def main():
     """ main - the entry point to the application """
@@ -16,6 +21,22 @@ def main():
     #		join
     #		quit
     #		send message -> message-mangler
+
+    listener.start()
+    time.sleep(1)
+
+    # Write to listener, simulates incoming messages, this will be replaced later
+    address = ("", settings.PORT)
+    s = socket.socket(type=socket.SOCK_DGRAM)
+    time.sleep(1)
+
+    s.sendto(b"aaaaa", address)
+    s.sendto(b"aaaaa", address)
+    time.sleep(1)
+
+    messages = listener.get_messages()
+    listener.stop()
+    print(messages)
 
 
 if __name__ == "__main__":

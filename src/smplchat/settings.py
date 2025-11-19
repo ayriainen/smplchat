@@ -3,6 +3,8 @@ from os import getenv
 from sys import stderr
 
 DEBUG = getenv("DEBUG")
+PORT = 62733
+
 
 def dprint(*args, **kwargs):
     """ dprint - just as print, but prints to stderr only if DEBUG is defined """
