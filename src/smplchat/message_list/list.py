@@ -63,12 +63,17 @@ class MessageList:
 
 		if isinstance(msg, LeaveRelayMessage):
 			pass
+
 		return False
+
 
 	def find(self, uid: int):
 		""" find - finds if there is already message of uid
 			returns position in the list or None
 		"""
+		for i, entry in enumerate(self.__messages):
+			if entry.uid == uid:
+				return i
 		return None
 
 	def get(self):
