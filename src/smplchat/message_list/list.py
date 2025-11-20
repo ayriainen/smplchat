@@ -2,7 +2,17 @@
 from smplchat.packet_mangler import Message
 
 class MessageList:
-	""" MessageList - The actual class """
+	""" MessageList - The for the list.
+		List itself contains tuples as follows:
+		(uid, seen, time, nick, message)
+		
+		Where:
+		uid - unique ID of message
+		seen - counter how many times message is added
+		time - senders local time
+		nick - the nick of sender
+		message - message content
+	"""
 	def __init__(self):
 		self.__messages = []
 
