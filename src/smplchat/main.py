@@ -4,6 +4,7 @@ import time
 
 from smplchat import settings
 from smplchat.listener import Listener
+from smplchat.message_list import MessageList
 
 
 def main():
@@ -24,6 +25,7 @@ def main():
     #		send message -> message-mangler
 
     listener = Listener()
+    messages = MessageList()
     
     time.sleep(1)
 
