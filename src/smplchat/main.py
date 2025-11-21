@@ -1,47 +1,40 @@
 """ main.py - smplchat """
-import socket
-import time
-
 from smplchat import settings
+from smplchat.argparsing import parse_args, parse_host_port, parse_partners
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList
-
+from smplchat.dispatcher import Dispatcher
+# from smplchat.tui import run_tui
 
 def main():
-    """ main - the entry point to the application """
-    print("It's alive")
+    """ Main - the entry point to the application. Chat interface TUI, but started via CLI args. """
+    args = parse_args()
 
-    # initialize iplist & history
-    # initialize listener
-    # initialize dispatcher
-    # initialize message-mangler(iplist,history,listener(packet-queue),dispatcher)
-    # initialize ui(history)
-    # main loop:
-    #	mangle loop:
-    #		message-mangler-process-queue
-    #	UI: do action from ui for example:
-    #		join
-    #		quit
-    #		send message -> message-mangler
+    self_addr = parse_host_port(args.self_addr) if args.self_addr else None
+    peers = parse_partners(args.partners)
 
-    listener = Listener()
-    messages = MessageList()
-    
-    time.sleep(1)
+    listen_port = self_addr[1] if self_addr else settings.PORT
 
-    # Write to listener, simulates incoming messages, this will be replaced later
-    address = ("", settings.PORT)
-    s = socket.socket(type=socket.SOCK_DGRAM)
-    time.sleep(1)
+    # core
+    listener = Listener(port=listen_port)
+    msg_list = MessageList()
+    dispatcher = Dispatcher(
+        listener=listener,
+        message_list=msg_list,
+        peers=peers,
+        nick=args.nick,
+        self_addr=self_addr,
+    )
 
-    s.sendto(b"aaaaa", address)
-    s.sendto(b"aaaaa", address)
-    time.sleep(1)
+    dispatcher.send_join()
 
-    messages = listener.get_messages()
-    listener.stop()
-    print(messages)
-
+    try:
+        # curses
+        # run_tui(msg_list, dispatcher, args.nick)
+    finally:
+        # exit cleanup
+        dispatcher.stop()
+        listener.stop()
 
 if __name__ == "__main__":
     main()
