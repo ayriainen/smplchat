@@ -39,11 +39,15 @@ class MessageList:
     def __update_message(self, uid, time, nick, message):
         pos = self.find(uid)
         if pos is not None:
-            seen = self.__messages[pos].seen
+            entry = self.__messages[pos]
+            seen = entry.seen
             if seen > 0:
                 self.__messages[pos] = MessageEntry (
-                    **self.__messages[pos],
-                    seen = seen + 1 )
+                    uid = entry.uid,
+                    seen = seen + 1,
+                    time = entry.time,
+                    nick = entry.nick,
+                    message = entry.message )
                 return True
             self.__messages[pos] = MessageEntry (
                     uid = uid,
@@ -70,7 +74,7 @@ class MessageList:
                 message = "*** left the chat"
             if self.__update_message(uid, time, nick, message):
                 self.__add_unseen_history(uid, msg.old_message_ids)
-                return True
+                return False
 
             self.__messages.append(MessageEntry (
                 uid = uid,
@@ -98,3 +102,11 @@ class MessageList:
         """ get - Gets current list """
         self.__update()
         return self.__messages
+
+    def latest_ids(self, limit=None):
+        """Returns latest IDs and has a limit function."""
+        if limit is None or limit >= len(self.__messages):
+            base = self.__messages
+        else:
+            base = self.__messages[-limit:]
+        return [entry.uid for entry in base]
