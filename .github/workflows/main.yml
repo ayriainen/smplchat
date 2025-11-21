@@ -21,18 +21,12 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.12"
-    - name: Install Poetry
+    - name: Install Poetry with dependencies
       run: |
-        pip install poetry
-    - name: Install dependencies with Poetry
-      env:
-        PYTHON_KEYRING_BACKEND: keyring.backends.fail.Keyring
-      run: |
-        poetry install
+        ./dev.sh dev
     - name: Run pytest with coverage
       run: |
-        poetry run coverage run -m pytest -v .
-        poetry run coverage xml
+        ./dev.sh covxml
     - name: Run pylint
       run: |
-        poetry run pylint --fail-under=7 src/
+        ./dev.sh pylint

@@ -69,7 +69,7 @@ case $1 in
 		;;
 
 	pylint)
-		poetry run pylint "$DEVSH_PATH"/src/
+		poetry run pylint --fail-under=7 "$DEVSH_PATH"/src/
 		;;
 
 	coverage)
