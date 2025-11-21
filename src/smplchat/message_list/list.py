@@ -35,6 +35,22 @@ class MessageList:
     def __add_unseen_history(self, uid: int, history: list[int]):
         """ __add_unseen_history - adds unseen messages to
             the message list in corrent order and place. """
+        pos = self.find(uid)
+        # If this is not the first time we got the actual message
+        if self.__messages[pos].seen != 1:
+            return False
+        for rcv_uid in history:
+            if self.find(rcv_uid) is None:
+                self.__messages.insert(pos, MessageEntry (
+                    uid = randrange(400000000), # should have common helper
+                    seen = 0,
+                    time = 0,
+                    nick = "system",
+                    message = f"<{rcv_uid}> message pending" ) )
+                pos += 1
+                updated = True
+        return updated
+            
 
     def __update_message(self, uid, time, nick, message):
         pos = self.find(uid)
