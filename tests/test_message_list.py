@@ -140,3 +140,12 @@ class TestMessageList(unittest.TestCase):
             nick='hisory-person', message='history testing'),
             MessageEntry(uid=81, seen=1, time=774,
             nick='hisory-person2', message='history of history testing')])
+
+    def test_seen_counter(self):
+        self.ml = MessageList()
+        self.add_chat1()
+        self.add_chat1()
+        self.add_chat1()
+        self.assertEqual(self.ml.get(), [
+            MessageEntry( uid=3, seen=3, time=666,
+            nick='tester', message='testing yeah') ])
