@@ -3,7 +3,7 @@ from smplchat.input_utils import prompt_nick, prompt_self_addr
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
-#from smplchat.tui import run_tui
+from smplchat.tui import UserInterface
 
 def main():
     """ main - the entry point to the application """
@@ -26,14 +26,15 @@ def main():
         nick=nick,
         self_addr=self_addr
     )
+    
+    # tui = UserInterface(msg_list)
 
     while (True):
-        #listener.update()
-        #rx_msgs = listener.get()
-        #for rx_msg in rx_msgs:
+        #for rx_msg in listener.update():
         #    msg = unpacker(rx_msg)
         #    if msg.type < 128: #relay message
-        #	if msg_list.
+        #	if msg_list.is_seen:
+        #          dispatcher.send(message)
         #intxt = tui.update
         #if intxt.startswith("/quit"):
         #    msg = LeaveRealyMessage(...)
