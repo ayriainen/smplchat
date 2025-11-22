@@ -20,9 +20,8 @@ def main():
     dispatcher = Dispatcher(
         listener=listener,
         message_list=msg_list,
-        peers=[],
         nick=nick,
-        self_addr=self_addr,
+        self_addr=self_addr
     )
 
     try:
