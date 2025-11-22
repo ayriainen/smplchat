@@ -24,22 +24,22 @@ def parse_partners(partners_str):
 
 def prompt_nick() -> str:
     """Prompts nickname at start."""
-    prompt = "Enter nickname for chat: "
-    input_nick = input(prompt).strip()
+    input_nick = input("Enter nickname for chat: ").strip()
     return input_nick or "anon"
 
 def prompt_self_addr(
-    default_host: str = "127.0.0.1",
-    default_port: int | None = None,
-) -> str | None:
-    """Prompts host:post at start."""
+    default_host="127.0.0.1",
+    default_port=None,
+) -> tuple[str, int]:
+    """Prompts host:port at start."""
     if default_port is None:
         default_port = settings.PORT
 
     default_str = f"{default_host}:{default_port}"
-
     print(f"Enter your own address as ip:port (leave empty for default {default_str})")
     addr_in = input("Your address: ").strip()
+
     if not addr_in:
-        return None
-    return addr_in
+        return (default_host, default_port)
+
+    return parse_host_port(addr_in)
