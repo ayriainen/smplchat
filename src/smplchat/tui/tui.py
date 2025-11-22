@@ -4,7 +4,7 @@ import locale
 import datetime
 from types import SimpleNamespace
 
-from smplchat import settings
+from smplchat.utils import dprint, get_time_from_uid
 
 class UserInterface:
     """ class for capturing user inputs and rendering
@@ -104,7 +104,7 @@ class UserInterface:
         while True:
             try:
                 ch = self._windows.stdscr.get_wch()
-                settings.dprint("type, repr ch: ", type(ch), repr(ch))
+                dprint("type, repr ch: ", type(ch), repr(ch))
             # no input
             except curses.error:
                 break
@@ -169,7 +169,9 @@ class UserInterface:
         self._windows.msg_win.erase()
         lines = []
         for entry in self.messages:
-            time_str = datetime.datetime.fromtimestamp(entry.time).strftime("%H:%M:%S")
+            time_str = ( datetime.datetime
+                    .fromtimestamp(get_time_from_uid(entry.uid))
+                    .strftime("%H:%M:%S") )
             lines.append(f"[{time_str}] {entry.nick}: {entry.message}")
         msg_h, msg_w = self._windows.msg_win.getmaxyx()
         start = max(0, len(lines) - msg_h)

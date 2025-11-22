@@ -8,7 +8,6 @@ from smplchat.packet_mangler import (
     JoinReplyMessage)
 from smplchat.utils import (
     generate_uid,
-    get_time_from_uid,
     dprint )
 
 @dataclass
@@ -18,13 +17,11 @@ class MessageEntry:
         Details:
         uid - unique ID of message
         seen - counter how many times message is added
-        time - senders local time
         nick - the nick of sender
         message - message content
     """
     uid: int
     seen: int
-    time: int
     nick: str
     message: str
 
@@ -50,7 +47,6 @@ class MessageList:
                 self.__messages.insert(pos, MessageEntry (
                     uid = rcv_uid,
                     seen = 0,
-                    time = 0,
                     nick = "system",
                     message = f"<{rcv_uid}> message pending" ) )
                 pos += 1
@@ -58,7 +54,7 @@ class MessageList:
         return new_entries
 
 
-    def __update_message(self, uid, time, nick, message):
+    def __update_message(self, uid, nick, message):
         pos = self.find(uid)
         if pos is not None:
             entry = self.__messages[pos]
@@ -67,14 +63,12 @@ class MessageList:
                 self.__messages[pos] = MessageEntry (
                     uid = entry.uid,
                     seen = seen + 1,
-                    time = entry.time,
                     nick = entry.nick,
                     message = entry.message )
                 return True
             self.__messages[pos] = MessageEntry (
                     uid = uid,
                     seen = 1,
-                    time = time,
                     nick = nick,
                     message = message )
             self.updated = True
@@ -86,7 +80,6 @@ class MessageList:
         if isinstance(msg,
                 (ChatRelayMessage, JoinRelayMessage, LeaveRelayMessage)):
             uid = msg.uniq_msg_id
-            time = msg.sender_local_time
             nick = msg.sender_nick
             if isinstance(msg, ChatRelayMessage):
                 message = msg.msg_text
@@ -94,14 +87,13 @@ class MessageList:
                 message = "*** joined the chat"
             elif isinstance(msg, LeaveRelayMessage):
                 message = "*** left the chat"
-            if self.__update_message(uid, time, nick, message):
+            if self.__update_message(uid, nick, message):
                 self.__add_unseen_history(uid, msg.old_message_ids)
                 return False
 
             self.__messages.append(MessageEntry (
                 uid = uid,
                 seen = 1,
-                time = time,
                 nick = nick,
                 message = message ))
 
@@ -125,7 +117,6 @@ class MessageList:
         self.__messages.append(MessageEntry (
             uid = uid,
             seen = 1,
-            time = get_time_from_uid(uid),
             nick = "system",
             message = text))
         return uid

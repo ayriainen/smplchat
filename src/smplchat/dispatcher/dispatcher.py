@@ -5,10 +5,9 @@
 import socket
 import struct
 import time
-import random
 import threading
 
-from smplchat.settings import dprint
+from smplchat.utils import dprint, generate_uid
 from smplchat.packet_mangler import (
     MessageType,
     ChatRelayMessage,
@@ -17,10 +16,6 @@ from smplchat.packet_mangler import (
     packer,
     unpacker,
 )
-
-def _new_uid():
-    """Randomizer and time used for ID."""
-    return int(time.time() * 1000) ^ random.getrandbits(32)
 
 def _ip_to_int(ip_str):
     """Convert string to int for packet mangler."""
@@ -48,7 +43,7 @@ class Dispatcher:
 
         if self_addr is None or nick is None:
             raise ValueError("self_addr and nick required")
-        
+
         # this is a boolean for whether we are in a peer group or just open for one
         self.connected = True
 
@@ -99,9 +94,8 @@ class Dispatcher:
 
         msg = msg_cls(
             msg_type=msg_type,
-            uniq_msg_id=_new_uid(),
+            uniq_msg_id=generate_uid(),
             sender_ip=self.self_ip_int,
-            sender_local_time=int(time.time()),
             old_message_ids=old_ids,
             sender_nick=self.nick,
             **extra,
