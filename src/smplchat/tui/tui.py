@@ -1,6 +1,7 @@
 """ tui.py - a simple user interface for smplchat """
 import curses
 import locale
+import datetime
 from types import SimpleNamespace
 
 from smplchat import settings
@@ -8,8 +9,9 @@ from smplchat import settings
 class UserInterface:
     """ class for capturing user inputs and rendering
         received messages """
-    def __init__(self, messages: list[str], username: str):
-        self.messages = messages
+    def __init__(self, messages, username: str):
+        # fetch the list of current messages
+        self.messages = messages.get()
         self.username = username
 
         # curses window objects
@@ -28,6 +30,8 @@ class UserInterface:
             w=0,
             initialized=False,
         )
+
+        self.start()
 
     def start(self) -> None:
         """ Initialize curses and create windows. """
@@ -92,6 +96,7 @@ class UserInterface:
         # completed = self._handle_input()
         completed = self._handle_input()
         self._render_all()
+        # return message or None, if no new message from user
         return completed
 
     def _handle_input(self):
@@ -130,10 +135,11 @@ class UserInterface:
                     self._state.cursor_pos + 1
                     )
                 continue
-            # is Ctrl-C / Ctrl-D
+            # is Ctrl-C, user wants to exit the program
             if ch in (3, '\x03'):
-                raise KeyboardInterrupt
-                # TODO: change behaviour to a graceful exit # pylint: disable=fixme
+                return "/quit"
+
+
             # some special keys, or up/down arrow
             if isinstance(ch, int):
                 continue
@@ -161,7 +167,10 @@ class UserInterface:
     def _render_messages(self) -> None:
         """ renders messages to message-window"""
         self._windows.msg_win.erase()
-        lines = self.messages
+        lines = []
+        for entry in self.messages:
+            time_str = datetime.datetime.fromtimestamp(entry.time).strftime("%H:%M:%S")
+            lines.append(f"[{time_str}] {entry.nick}: {entry.message}")
         msg_h, msg_w = self._windows.msg_win.getmaxyx()
         start = max(0, len(lines) - msg_h)
         shown = lines[start: start + msg_h]
@@ -203,6 +212,7 @@ class UserInterface:
 
 if __name__ == "__main__":
     import time
+    from smplchat.message_list import MessageList
 
     msg_list = [
         "Aku: Hei vaan kaikille!",

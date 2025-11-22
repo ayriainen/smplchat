@@ -26,8 +26,8 @@ def main():
         nick=nick,
         self_addr=self_addr
     )
-    
-    # tui = UserInterface(msg_list)
+
+    tui = UserInterface(msg_list, nick)
 
     while (True):
         #for rx_msg in listener.update():
@@ -35,12 +35,15 @@ def main():
         #    if msg.type < 128: #relay message
         #	if msg_list.is_seen:
         #          dispatcher.send(message)
-        #intxt = tui.update
-        #if intxt.startswith("/quit"):
-        #    msg = LeaveRealyMessage(...)
+        intxt = tui.update()
+        if intxt == None:
+            continue
+        if intxt.startswith("/quit"):
+        #    msg = LeaveRelayMessage(...)
         #    dispatcher.send(msg)
         #    msg_list.add(msg)
-        #    break
+            tui.stop()
+            break
         #elif intxt.startswith("/nick"):
         #    nick = intxt.split()[1]
         #else:
