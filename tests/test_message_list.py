@@ -8,7 +8,8 @@ from smplchat.message import (
     JoinRelayMessage,
     LeaveRelayMessage,
     JoinReplyMessage,
-    JoinRequestMessage )
+    JoinRequestMessage,
+    OldReplyMessage )
 
 class TestMessageList(unittest.TestCase):
     def test_init(self):
@@ -31,6 +32,15 @@ class TestMessageList(unittest.TestCase):
             old_message_ids = [],
             sender_nick = "tester2",
             msg_text = "testing hell yeah" ))
+
+    def add_chat3(self):
+        self.ml.add(ChatRelayMessage(
+            msg_type = 0,
+            uniq_msg_id = 5,
+            sender_ip = 73,
+            old_message_ids = [13],
+            sender_nick = "mokkeli",
+            msg_text = "höh. ei se nyt niin saa olla." ))
 
     def add_chat_with_history(self):
         self.ml.add(ChatRelayMessage(
@@ -77,6 +87,14 @@ class TestMessageList(unittest.TestCase):
             msg_type = 128,
             uniq_msg_id = 23579,
             sender_nick = "hei_vaan" ))
+
+    def add_old_reply(self):
+        self.ml.add(OldReplyMessage(
+            msg_type = 131,
+            old_msg_type = 0,
+            uniq_msg_id = 13,
+            sender_nick = "vastaamo",
+            msg_text = "sitä saa mitä kysyy" ))
 
     def test_add(self):
         self.ml = MessageList()
@@ -183,3 +201,18 @@ class TestMessageList(unittest.TestCase):
         self.ml.sys_message("joopajoo")
         self.assertEqual(self.ml.get()[0].message, "joopajoo")
         self.assertEqual(self.ml.get()[0].nick, "system")
+
+    def test_old_reply(self):
+        self.ml = MessageList()
+        self.add_chat3()
+        self.add_old_reply()
+        self.assertEqual(self.ml.get(), [
+            MessageEntry(uid=13, mtype=0, seen=1,
+            nick='vastaamo', message='sitä saa mitä kysyy'),
+            MessageEntry(uid=5, mtype=0, seen=1,
+            nick='mokkeli', message='höh. ei se nyt niin saa olla.')] )
+
+    def test_old_reply_no_request(self):
+        self.ml = MessageList()
+        self.add_old_reply()
+        self.assertEqual(self.ml.get(), [] )

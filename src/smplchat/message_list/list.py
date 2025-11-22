@@ -6,7 +6,8 @@ from smplchat.message import (
     ChatRelayMessage,
     JoinRelayMessage,
     LeaveRelayMessage,
-    JoinReplyMessage)
+    JoinReplyMessage,
+    OldReplyMessage)
 from smplchat.utils import (
     generate_uid,
     dprint )
@@ -94,18 +95,23 @@ class MessageList:
 
     def add(self, msg: Message):
         """ add - Adds message and its history to the list """
-        if isinstance(msg,
-                (ChatRelayMessage, JoinRelayMessage, LeaveRelayMessage)):
+        if isinstance(msg, (ChatRelayMessage, JoinRelayMessage,
+                LeaveRelayMessage, OldReplyMessage)):
             uid = msg.uniq_msg_id
             nick = msg.sender_nick
             mtype = ( msg.old_msg_type if hasattr(msg, "old_msg_type")
                     else msg.msg_type )
             text = msg.msg_text if hasattr(msg, "msg_text") else ""
             message = self.__generate_message(mtype, text)
+
             if self.__update_message(uid, mtype, nick, message):
                 if hasattr(msg, "old_message_ids"):
                     self.__add_unseen_history(uid, msg.old_message_ids)
                 return True
+
+            if isinstance(msg, OldReplyMessage):
+                dprint("Got reply without asking")
+                return False
 
             self.__messages.append(MessageEntry (
                 uid = uid,
