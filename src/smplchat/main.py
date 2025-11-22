@@ -26,7 +26,7 @@ def main():
         nick=nick,
         self_addr=self_addr
     )
-    
+
     while (True):
         #listener.update()
         #rx_msgs = listener.get()

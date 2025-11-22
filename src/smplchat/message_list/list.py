@@ -129,7 +129,7 @@ class MessageList:
             nick = "system",
             message = text))
         return uid
-                    
+
     def find(self, uid: int):
         """ find - finds if there is already message of uid
             returns position in the list or None
@@ -137,6 +137,13 @@ class MessageList:
         for i, entry in enumerate(self.__messages):
             if entry.uid == uid:
                 return i
+        return None
+
+    def is_seen(self, uid: int):
+        """ is_seen - Returns how many times uid is seen """
+        for m in self.__messages:
+            if m.uid == uid:
+                return m.seen
         return None
 
     def get(self):
