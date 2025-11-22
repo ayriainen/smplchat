@@ -110,13 +110,7 @@ class MessageList:
             return True
 
         if isinstance(msg, JoinReplyMessage):
-            uid = generate_uid()
-            self.__messages.append(MessageEntry (
-                uid = uid,
-                seen = 1,
-                time = get_time_from_uid(uid),
-                nick = "system",
-                message = "*** Join request succesful"))
+            uid = self.sys_message("*** Join request succesful")
             self.__add_unseen_history(uid, msg.old_message_ids)
             self.updated = True
             return True
@@ -125,7 +119,17 @@ class MessageList:
         dprint(msg)
         return False
 
-
+    def sys_message(self, text):
+        """ Appends system message to the end of message list"""
+        uid = generate_uid()
+        self.__messages.append(MessageEntry (
+            uid = uid,
+            seen = 1,
+            time = get_time_from_uid(uid),
+            nick = "system",
+            message = text))
+        return uid
+                    
     def find(self, uid: int):
         """ find - finds if there is already message of uid
             returns position in the list or None
