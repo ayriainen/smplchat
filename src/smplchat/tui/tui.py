@@ -187,10 +187,10 @@ class UserInterface:
         """ renders text to info-window """
         self._windows.info_win.erase()
         _, info_w = self._windows.info_win.getmaxyx()
-        status = "/join to join the chat, /leave to leave the chat"
+        status = "/join <ip-address> - join chat, /quit - quit the application"
         try:
             self._windows.info_win.addnstr(0, 0, status, info_w -1)
-            self._windows.info_win.addnstr(1, 0, "Enter=send   Ctrl-C=quit", info_w - 1)
+            self._windows.info_win.addnstr(1, 0, "<message> + Enter - send messages", info_w - 1)
         except curses.error:
             pass
         self._windows.info_win.noutrefresh()
