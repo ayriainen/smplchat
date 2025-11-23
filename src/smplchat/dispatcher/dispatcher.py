@@ -29,13 +29,14 @@ class Dispatcher:
         self,
         listener,
         message_list,
-        peers=None,
+        client_list,
         nick=None,
         self_addr=None,
-        poll_interval=0.05,
+        poll_interval=0.05
     ):
         self.listener = listener
         self.msg_list = message_list
+        self.client_list = client_list
         self.nick = nick
         self.self_addr = self_addr
         self.poll_interval = poll_interval
@@ -49,35 +50,12 @@ class Dispatcher:
         # convert own address IP into int
         self.self_ip_int = _ip_to_int(self.self_addr[0])
 
-        # peers
-        self.peers: list[tuple[str, int]] = []
-        for p in peers or []:
-            self.add_peer(p)
-
         # socket from listener for peer discovery (couldn't manage it with separate)
         self.sock = self.listener.sock
 
         self._stop = False
         self._thread = threading.Thread(target=self._loop, daemon=True)
         self._thread.start()
-
-    def add_peer(self, addr):
-        """Add peer, ignoring duplicates and self."""
-        peer = addr
-
-        if peer == self.self_addr:
-            return
-
-        if peer not in self.peers:
-            self.peers.append(peer)
-            dprint("dispatcher: added peer", peer)
-
-    def remove_peer(self, addr):
-        """Remove peer."""
-        peer = addr
-        if peer in self.peers:
-            self.peers.remove(peer)
-            dprint("dispatcher: removed peer", peer)
 
     def _make_and_send(self, msg_cls, msg_type, **extra):
         """Common code for messages."""
@@ -88,6 +66,7 @@ class Dispatcher:
             except Exception:
                 old_ids = []
 
+        # join msg means joined a peer group or open to one
         if msg_type == MessageType.JOIN_RELAY:
             self.connected = True
 
@@ -133,7 +112,7 @@ class Dispatcher:
 
         # no gossiping
         self.connected = False
-        self.peers.clear()
+        self.client_list.clear()
 
     def _loop(self):
         """Actual loop for incoming packets."""
@@ -157,9 +136,11 @@ class Dispatcher:
         if not self.connected:
             return
 
-        # for now leave adds peer, but it shouldn't once the leave message gets further refined
-        if isinstance(msg, (ChatRelayMessage, JoinRelayMessage, LeaveRelayMessage)):
-            self.add_peer(addr)
+        if isinstance(msg, (ChatRelayMessage, JoinRelayMessage)):
+            self.client_list.add(addr)
+            self._handle_relay(msg)
+        elif isinstance(msg, LeaveRelayMessage):
+            self.client_list.remove(addr)
             self._handle_relay(msg)
 
     def _handle_relay(self, msg):
@@ -186,7 +167,8 @@ class Dispatcher:
         data = packer(msg)
         if not data:
             return
-        for addr in list(self.peers):
+
+        for addr in self.client_list.get(n=10):
             try:
                 self.sock.sendto(data, addr)
             except OSError as e:

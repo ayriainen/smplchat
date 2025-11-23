@@ -28,6 +28,7 @@ def main():
     dispatcher = Dispatcher(
         listener=listener,
         message_list=msg_list,
+        client_list = ip_list,
         nick=nick,
         self_addr=self_addr
     )
