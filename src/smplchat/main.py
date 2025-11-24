@@ -35,40 +35,35 @@ def main():
 
     tui = UserInterface(msg_list, nick)
 
-    while True:
-        #for rx_msg in listener.update():
-        #    msg = unpacker(rx_msg)
-        #    if msg.type < 128: #relay message
-        #	if msg_list.is_seen:
-        #          dispatcher.send(message)
-        ip_list.update()
-        intxt = tui.update(nick)
-        if intxt is None:
-            continue
-        if intxt.startswith("/nick"):
-            nick = intxt.split()[1]
-            continue
-        if intxt.startswith("/quit"):
-        #    msg = LeaveRelayMessage(...)
-        #    dispatcher.send(msg)
-        #    msg_list.add(msg)
-            tui.stop()
-            break
+    try:
+        while True:
+            #for rx_msg in listener.update():
+            #    msg = unpacker(rx_msg)
+            #    if msg.type < 128: #relay message
+            #	if msg_list.is_seen:
+            #          dispatcher.send(message)
+            ip_list.update()
+            intxt = tui.update(nick)
+            if intxt is None:
+                continue
+            if intxt.startswith("/nick"):
+                nick = intxt.split()[1]
+                continue
+            if intxt.startswith("/quit"):
+            #    msg = LeaveRelayMessage(...)
+            #    dispatcher.send(msg)
+            #    msg_list.add(msg)
+                tui.stop()
+                break
 
-        msg = new_message(nick, intxt, self_addr, msg_list)
-        msg_list.add(msg)
-        #dispatcher.send(msg)
-
-
-    #try:
-        # curses
-        #run_tui(msg_list, dispatcher, nick)
-        #pass # remove once tui done
-    #finally:
+            msg = new_message(nick, intxt, self_addr, msg_list)
+            msg_list.add(msg)
+            #dispatcher.send(msg)
+    finally:
         # exit cleanup
-    dispatcher.stop()
-    listener.stop()
-    tui.stop()
+        dispatcher.stop()
+        listener.stop()
+        tui.stop()
 
 if __name__ == "__main__":
     main()
