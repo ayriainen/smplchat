@@ -2,6 +2,7 @@
 import curses
 import locale
 import datetime
+from signal import signal, SIGINT
 from types import SimpleNamespace
 
 from smplchat.utils import dprint, get_time_from_uid
@@ -10,6 +11,14 @@ class UserInterface:
     """ class for capturing user inputs and rendering
         received messages """
     def __init__(self, messages, username: str):
+
+        # Add own handler for keyboard interrupt
+        self.__quit_called = False
+        def handler(*_):
+            self.__quit_called = True
+
+        signal(SIGINT, handler)
+
         # fetch the list of current messages
         self.messages = messages.get()
         self.username = username
@@ -83,6 +92,8 @@ class UserInterface:
     def update(self, username):
         """ Render windows with new messages and of info, process user input.
         Returns completed input string if user has pressed enter. """
+        if self.__quit_called:
+            return "/quit"
         self.username = username
         if not self._state.initialized:
             raise RuntimeError("UI not started; call start() first")
@@ -134,10 +145,6 @@ class UserInterface:
                     self._state.cursor_pos + 1
                     )
                 continue
-            # is Ctrl-C, user wants to exit the program
-            if ch in (3, '\x03'):
-                return "/quit"
-
 
             # some special keys, or up/down arrow
             if isinstance(ch, int):
