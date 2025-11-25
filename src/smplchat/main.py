@@ -4,7 +4,7 @@ from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
 from smplchat.tui import UserInterface
-from smplchat.message import new_message
+from smplchat.message import new_message, MessageType
 from smplchat.client_list import ClientList
 
 def main():
@@ -50,13 +50,21 @@ def main():
                 nick = intxt.split()[1]
                 continue
             if intxt.startswith("/quit"):
-            #    msg = LeaveRelayMessage(...)
-            #    dispatcher.send(msg)
-            #    msg_list.add(msg)
+                msg = new_message(msg_type=MessageType.LEAVE_RELAY, nick=nick,
+                        ip=self_addr, msg_list=msg_list)
+                #    dispatcher.send(msg)
+                #    msg_list.add(msg)
                 tui.stop()
                 break
+            if intxt.startswith("/join"):
+                msg = new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick)
+                remote_ip = intxt.split()[1]
+                #    dispatcher.send(msg)
+                msg_list.sys_message(f"*** Join request sent to {remote_ip}")
+                continue
 
-            msg = new_message(nick, intxt, self_addr, msg_list)
+            msg = new_message(msg_type=MessageType.CHAT_RELAY, nick=nick,
+                    text=intxt, ip=self_addr, msg_list=msg_list)
             msg_list.add(msg)
             #dispatcher.send(msg)
     finally:
