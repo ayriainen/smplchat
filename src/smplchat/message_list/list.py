@@ -168,8 +168,7 @@ class MessageList:
 
     def latest_ids(self, limit=None):
         """Returns latest IDs and has a limit function."""
-        if limit is None or limit >= len(self.__messages):
-            base = self.__messages
-        else:
-            base = self.__messages[-limit:]
-        return [entry.uid for entry in base]
+        uid_list = [x.uid for x in self.__messages if x.nick != "system"]
+        if limit is None or limit >= len(uid_list):
+            return uid_list
+        return uid_list[-limit:]

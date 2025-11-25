@@ -29,7 +29,7 @@ def new_message(msg_type: MessageType, **kwargs):
                     msg_type = MessageType.CHAT_RELAY,
                     uniq_msg_id = uid,
                     sender_ip = kwargs["ip"],
-                    old_message_ids = [], #TODO: msg_list.get_latest_uids(),
+                    old_message_ids = kwargs["msg_list"].latest_ids(),
                     sender_nick = kwargs["nick"],
                     msg_text = kwargs["text"])
 
@@ -38,7 +38,7 @@ def new_message(msg_type: MessageType, **kwargs):
                     msg_type = MessageType.JOIN_RELAY,
                     uniq_msg_id = uid,
                     sender_ip = kwargs["ip"],
-                    old_message_ids = [], #TODO: msg_list.get_latest_uids(),
+                    old_message_ids = kwargs["msg_list"].latest_ids(),
                     sender_nick = kwargs["nick"])
 
             case MessageType.LEAVE_RELAY:
@@ -46,7 +46,7 @@ def new_message(msg_type: MessageType, **kwargs):
                     msg_type = MessageType.LEAVE_RELAY,
                     uniq_msg_id = uid,
                     sender_ip = kwargs["ip"],
-                    old_message_ids = [], #TODO: msg_list.get_latest_uids(),
+                    old_message_ids = kwargs["msg_list"].latest_ids(),
                     sender_nick = kwargs["nick"])
 
             case MessageType.JOIN_REQUEST:
@@ -58,7 +58,7 @@ def new_message(msg_type: MessageType, **kwargs):
             case MessageType.JOIN_REPLY:
                 return JoinReplyMessage(
                     msg_type = MessageType.JOIN_REPLY,
-                    old_message_ids = [], #TODO: msg_list.get_latest_uids(),
+                    old_message_ids = kwargs["msg_list"].latest_ids(),
                     ip_addresses = kwargs["client_list"].get() )
 
     except KeyError as e:
