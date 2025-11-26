@@ -5,7 +5,7 @@ import datetime
 from signal import signal, SIGINT
 from types import SimpleNamespace
 
-from smplchat.utils import dprint, get_time_from_uid
+from smplchat.utils import get_time_from_uid
 
 class UserInterface:
     """ class for capturing user inputs and rendering
@@ -82,7 +82,7 @@ class UserInterface:
     def _setup_windows(self) -> None:
         h, w = self._windows.stdscr.getmaxyx()
         self._state.h, self._state.w = h, w
-        info_h, input_h = 3, 3
+        info_h, input_h = 4, 2
         msg_h = h - info_h - input_h
         self._windows.msg_win = self._windows.stdscr.derwin(msg_h, w, 0, 0)
         self._windows.info_win = self._windows.stdscr.derwin(info_h, w, msg_h, 0)
@@ -196,8 +196,10 @@ class UserInterface:
         _, info_w = self._windows.info_win.getmaxyx()
         status = "/join <ip-address> - join chat, /quit - quit the application"
         try:
-            self._windows.info_win.addnstr(0, 0, status, info_w -1)
-            self._windows.info_win.addnstr(1, 0, "<message> + Enter - send messages", info_w - 1)
+            self._windows.info_win.hline(0, 0, "-", info_w - 1)
+            self._windows.info_win.addnstr(1, 0, status, info_w -1)
+            self._windows.info_win.addnstr(2, 0, "<message> + Enter - send messages", info_w - 1)
+            self._windows.info_win.hline(3, 0, "-", info_w - 1)
         except curses.error:
             pass
         self._windows.info_win.noutrefresh()
@@ -216,26 +218,3 @@ class UserInterface:
         except curses.error:
             pass
         self._windows.input_win.noutrefresh()
-
-if __name__ == "__main__":
-    import time
-    from smplchat.message_list import MessageList
-
-    msg_list = [
-        "Aku: Hei vaan kaikille!",
-        "Iines: No tervepä terve, mitäs sinne?",
-        "Aku: Kylmiä ilmoja on pidellyt, luita kolottaa."
-    ]
-    window = UserInterface(msg_list, "Testaaja")
-    window.start()
-
-    try:
-        while True:
-            new_msg = window.update()
-            if new_msg:
-                msg_list.append(f"{window.username}: {new_msg}")
-            time.sleep(0.05)
-    except KeyboardInterrupt:
-        pass
-    finally:
-        window.stop()
