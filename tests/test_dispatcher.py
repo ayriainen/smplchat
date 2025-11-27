@@ -1,103 +1,66 @@
-import time
-from smplchat.listener import Listener
-from smplchat.message_list import MessageList
+import socket
+import unittest
+from unittest.mock import patch, MagicMock, call
+
 from smplchat.dispatcher import Dispatcher
-from smplchat.client_list import ClientList
+from smplchat.message import ChatRelayMessage, MessageType
+from smplchat.settings import PORT
+from smplchat.utils import ip_to_int
 
-def test_dispatcher_startup():
-    listener = Listener(port=62740)
-    msg_list = MessageList()
-    ip_list = ClientList(("127.0.0.1", 62740))
+class TestDispatcher(unittest.TestCase):
 
-    dispatcher = Dispatcher(
-        listener=listener,
-        message_list=msg_list,
-        client_list=ip_list,
-        nick="testuser",
-        self_addr=("127.0.0.1", 62740)
-    )
+    @patch("smplchat.dispatcher.dispatcher.socket")
+    @patch("smplchat.dispatcher.dispatcher.packer")
+    def test_dispatcher_send(self, mock_packer, mock_socket):
+        dispatcher = Dispatcher()
+        mock_packer.return_value = b"BLABLA"
+        sock_instance = MagicMock()
+        mock_socket.return_value.__enter__.return_value = sock_instance
+        msg = ChatRelayMessage(
+            msg_type=MessageType.CHAT_RELAY,
+            uniq_msg_id=12,
+            sender_ip=666,
+            old_message_ids=[],
+            sender_nick="bobrikov",
+            msg_text="hi",
+        )
 
-    assert dispatcher.nick == "testuser"
-    assert dispatcher.self_addr == ("127.0.0.1", 62740)
+        ips = [
+            ip_to_int(socket.inet_aton("127.0.0.1")),
+            ip_to_int(socket.inet_aton("8.8.8.8")),
+        ]
 
-    assert dispatcher._thread.is_alive()
-    
-    # check they're using the same socket
-    assert dispatcher.sock is listener.sock
-    
-    # check the connected boolean at startup, this could change with different startup style
-    assert dispatcher.connected == True
+        dispatcher.send(msg, ips)
 
-    dispatcher.stop()
-    listener.stop()
+        self.assertEqual(mock_packer.call_count, 2)
+        mock_packer.assert_has_calls([call(msg), call(msg)])
+        mock_socket.assert_called_once()
+        expected_calls = [
+            (b"BLABLA", ("127.0.0.1", PORT)),
+            (b"BLABLA", ("8.8.8.8", PORT)),
+        ]
+        actual_calls = [c.args for c in sock_instance.sendto.call_args_list]
+        self.assertEqual(expected_calls, actual_calls)
 
-    # check shutdown succeeded
-    assert not dispatcher._thread.is_alive()
+    @patch("smplchat.dispatcher.dispatcher.socket")
+    @patch("smplchat.dispatcher.dispatcher.packer")
+    def test_dispatcher_no_send_empty_ip_list(self, mock_packer, mock_socket):
+        dispatcher = Dispatcher()
 
-def test_send_chat_message_works():
-    listener = Listener(port=62742)
-    msg_list = MessageList()
-    ip_list = ClientList(("127.0.0.1", 62742))
+        mock_packer.return_value = b"BLABLA"
 
-    dispatcher = Dispatcher(
-        listener=listener,
-        message_list=msg_list,
-        client_list=ip_list,
-        nick="bobrikov",
-        self_addr=("127.0.0.1", 62742)
-    )
+        msg = ChatRelayMessage(
+            msg_type=MessageType.CHAT_RELAY,
+            uniq_msg_id=12,
+            sender_ip=666,
+            old_message_ids=[],
+            sender_nick="aa",
+            msg_text="aa",
+        )
 
-    dispatcher.send_chat("test")
+        dispatcher.send(msg, [])
 
-    time.sleep(0.1)
+        sock_instance = mock_socket.return_value.__enter__.return_value
 
-    messages = msg_list.get()
-    assert len(messages) == 1
-    assert messages[0].nick == "bobrikov"
-    assert messages[0].message == "test"
-
-    dispatcher.stop()
-    listener.stop()
-
-def test_add_and_remove_peer():
-    """This was a test for dispatcher's peerlist. Now this remnant ended up testing clientlist through dispatcher."""
-    listener = Listener(port=62744)
-    msg_list = MessageList()
-    ip_list = ClientList(("127.0.0.1", 62744))
-
-    dispatcher = Dispatcher(
-        listener=listener,
-        message_list=msg_list,
-        client_list=ip_list,
-        self_addr=("127.0.0.1", 62744),
-        nick="testuser"
-    )
-
-    assert len(dispatcher.client_list.get(n=100)) == 0
-
-    # new peer
-    dispatcher.client_list.add(("127.0.0.1", 62745))
-    assert len(dispatcher.client_list.get(n=100)) == 1
-
-    # same again
-    dispatcher.client_list.add(("127.0.0.1", 62745))
-    assert len(dispatcher.client_list.get(n=100)) == 1
-
-    # self as peer
-    dispatcher.client_list.add(("127.0.0.1", 62744))
-    assert len(dispatcher.client_list.get(n=100)) == 1
-
-    # another actual new peer
-    dispatcher.client_list.add(("127.0.0.1", 62746))
-    assert len(dispatcher.client_list.get(n=100)) == 2
-
-    # remove peer
-    dispatcher.client_list.remove(("127.0.0.1", 62745))
-    assert len(dispatcher.client_list.get(n=100)) == 1
-
-    # clear
-    dispatcher.client_list.clear()
-    assert len(dispatcher.client_list.get(n=100)) == 0
-
-    dispatcher.stop()
-    listener.stop()
+        mock_packer.assert_not_called()
+        sock_instance.sendto.assert_not_called()
