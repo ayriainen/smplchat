@@ -13,7 +13,7 @@ from .message import (
 def new_message(msg_type: MessageType, **kwargs):
     """ Generates new message. TODO: move this in better place
         msg_type	- As defined in MessageType Enum
-        
+
         Optional parameters:
         nick		- Sets nick of sender
         text		- Actual text of message (used in CHAT_RELAY, OLD_REPLY)
@@ -23,7 +23,7 @@ def new_message(msg_type: MessageType, **kwargs):
                           for gathiring information of past messages
         client_list	- Needed only in JOIN_REPLY
         uid		- uid of message. Needen in OLD_REQUEST and OLD_REPLY
-        old_type		- Type on old message. Needed in OLD_REPLY        
+        old_type		- Type on old message. Needed in OLD_REPLY
     """
     uid = generate_uid()
     try:
@@ -80,7 +80,7 @@ def new_message(msg_type: MessageType, **kwargs):
 
     except KeyError as e:
         dprint(f"Cannot create message. Problem with new_message parameters.\n{e}")
-        raise KeyError
+        raise KeyError from e
 
-    dprint("fCould not create message with message type: {msg_type}")
+    dprint(f"Could not create message with message type: {msg_type}")
     return None

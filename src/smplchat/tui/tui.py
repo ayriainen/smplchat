@@ -172,7 +172,7 @@ class UserInterface:
     def _render_messages(self) -> None:
         """ renders messages to message-window"""
         if not self.messages.updated:
-            return None
+            return
         self.messages.updated = False
         self._windows.msg_win.erase()
         lines = []
