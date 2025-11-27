@@ -39,11 +39,11 @@ def main():
         while True:
 
             # Process input form listener
-            for rx_msg,remote_ip in listener.get_messages():
+            for rx_msg, remote_ip in listener.get_messages():
                 msg = unpacker(rx_msg)
                 if msg.msg_type < 128: #relay message
                     if not msg_list.is_seen(msg.uid):
-                        sender.send(message, ip_list.get())
+                        sender.send(msg, client_list.get())
                 if msg.msg_type == 129: #join reply
                     # TODO: Do the old messages
                     client_list.add_list(msg.ip_addresses)
@@ -70,9 +70,9 @@ def main():
                 try:
                     remote_ip = IPv4Address(intxt.split()[1])
                     msg_list.sys_message(f"*** Join request sent to {remote_ip}")
+                    sender.send(msg, [remote_ip])
                 except:
                     msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
-                sender.send(msg, [remote_ip])
             else: # only text to send
 
                 msg = new_message(msg_type=MessageType.CHAT_RELAY, nick=nick,

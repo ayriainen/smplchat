@@ -8,7 +8,7 @@ from smplchat import settings
 class Listener:
 
     def __init__(self):
-        self.__msg_queue: list[tuple[bytes, tuple[str, int]]] = []
+        self.__msg_queue: list[tuple[bytes, tuple[IPv4Address, int]]] = []
         self.__msg_lock: Lock = threading.Lock()
 
         self.__port = settings.PORT
@@ -30,15 +30,16 @@ class Listener:
         while not self.__stop:
             try:
                 data, addr = self._sock.recvfrom(10000)
+                addr = (IPv4Address(addr[0]), addr[1])
                 self.__append_msg(data, addr)
             except BlockingIOError as _:
                 pass
 
-    def __append_msg(self, data: bytes, addr: tuple[str, int]):
+    def __append_msg(self, data: bytes, addr: tuple[IPv4Address, int]):
         with self.__msg_lock:
             self.__msg_queue.append((data, addr))
 
-    def get_messages(self) -> list[tuple[bytes, tuple[str, int]]]:
+    def get_messages(self) -> list[tuple[bytes, tuple[IPv4Address, int]]]:
         ret = []
         with self.__msg_lock:
             ret = self.__msg_queue
