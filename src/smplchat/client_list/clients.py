@@ -14,6 +14,10 @@ class ClientList:
         if ip_addr != self.__own:
             self.__iplist[ip_addr] = int(time())
 
+    def add_list(self, ip_addresses: list[int]):
+        """ Adds list of ip addresses to the list """
+        (self.add(x) for x in ip_addresses)
+
     def remove(self, ip_addr):
         """ Just removes ip from the list. For example on leave """
         self.__iplist.pop(ip_addr, None)
