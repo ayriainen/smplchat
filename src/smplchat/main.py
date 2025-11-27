@@ -1,8 +1,6 @@
 """ main.py - smplchat """
-from ipaddress import IPv4Address
-
-from smplchat.client_list import ClientList
-from smplchat.input_utils import prompt_nick
+import socket
+from smplchat.input_utils import prompt_nick, prompt_self_addr
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.sender import Sender
@@ -10,16 +8,16 @@ from smplchat.tui import UserInterface
 from smplchat.message import new_message, MessageType
 from smplchat.client_list import ClientList
 from smplchat.packet_mangler import unpacker
-from .utils import get_my_ip, dprint
+from .utils import get_my_ip, dprint, ip_to_int, int_to_ip
 
 def main():
     """ main - the entry point to the application """
 
     print("Welcome to smplchat!\n")
+    
+    self_ip = ip_to_int(socket.inet_aton(get_my_ip()))
 
-    self_ip = IPv4Address(get_my_ip())
-
-    dprint(f"INFO: Got ip-address {self_ip}")
+    dprint(f"INFO: Got ip-address {socket.inet_ntoa(int_to_ip(self_ip))}")
 
     # prompt nickname
     nick = prompt_nick()
@@ -42,8 +40,24 @@ def main():
             for rx_msg, remote_ip in listener.get_messages():
                 msg = unpacker(rx_msg)
                 if msg.msg_type < 128: #relay message
-                    if not msg_list.is_seen(msg.uid):
+                    if not msg_list.is_seen(msg.uniq_msg_id):
                         sender.send(msg, client_list.get())
+                        msg_list.add(msg)
+                if msg.msg_type == 128: #join request
+                    dprint("REMOTE_IP", remote_ip)
+                    msg_list.sys_message(
+                            f"*** Join request from <{msg.sender_nick}>, "
+                            f"IP: {socket.inet_ntoa(int_to_ip(remote_ip))}")
+                    client_list.add(remote_ip)
+                    # Send join reply
+                    out_msg = new_message(msg_type=MessageType.JOIN_REPLY,
+                            ip=self_ip, msg_list=msg_list, client_list=client_list)
+                    sender.send(out_msg, [remote_ip])
+                    # Send join relay message
+                    out_msg = new_message(msg_type=MessageType.JOIN_RELAY,
+                            nick=msg.sender_nick, text=intxt, ip=remote_ip,
+                            msg_list=msg_list )
+                    sender.send(out_msg, client_list.get())
                 if msg.msg_type == 129: #join reply
                     # TODO: Do the old messages
                     client_list.add_list(msg.ip_addresses)
@@ -67,12 +81,12 @@ def main():
                 initial_messages(msg_list)
             elif intxt.startswith("/join"):
                 msg = new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick)
-                try:
-                    remote_ip = IPv4Address(intxt.split()[1])
-                    msg_list.sys_message(f"*** Join request sent to {remote_ip}")
-                    sender.send(msg, [remote_ip])
-                except:
-                    msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
+                #try:
+                remote_ip = ip_to_int(socket.inet_aton(intxt.split()[1]))
+                msg_list.sys_message(f"*** Join request sent to {socket.inet_ntoa(int_to_ip(remote_ip))}")
+                sender.send(msg, [remote_ip])
+                #except:
+                #    msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
             else: # only text to send
 
                 msg = new_message(msg_type=MessageType.CHAT_RELAY, nick=nick,

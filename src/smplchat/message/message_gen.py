@@ -80,7 +80,7 @@ def new_message(msg_type: MessageType, **kwargs):
 
     except KeyError as e:
         dprint(f"Cannot create message. Problem with new_message parameters.\n{e}")
-        return None
+        raise KeyError
 
     dprint("fCould not create message with message type: {msg_type}")
     return None

@@ -1,5 +1,4 @@
 """ smplchat.packet_mangler.packer - functions to form data from message classes """
-from ipaddress import IPv4Address
 from struct import pack, unpack, unpack_from
 from smplchat.settings import dprint
 from smplchat.message import (
@@ -46,7 +45,7 @@ def packer(m: Message):
                 f"{len(sender_nick)}s",
             m.msg_type,					# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
-            int(m.sender_ip),				# L - 4 bytes
+            m.sender_ip,				# L - 4 bytes
             len(m.old_message_ids),			# L - 4 bytes
             len(sender_nick),				# L - 4 bytes
 
@@ -58,7 +57,7 @@ def packer(m: Message):
             "=BQL",
             m.msg_type,					# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
-            int(m.sender_ip))				# L - 4 bytes
+            m.sender_ip)				# L - 4 bytes
 
     if isinstance(m, JoinRequestMessage):
         sender_nick = m.sender_nick.encode()
@@ -81,7 +80,7 @@ def packer(m: Message):
             len(m.ip_addresses),			# L - 4 bytes
 
             *m.old_message_ids,				# ?Q - ? x 8 bytes
-            map(int,*m.ip_addresses))				# ?L - ? x 4 bytes
+            *m.ip_addresses)				# ?L - ? x 4 bytes
 
     if isinstance(m, OldRequestMessage):
         return pack(
@@ -168,7 +167,7 @@ def unpack_joinleave_relay_message(data: bytes):
     return ret_type(
         msg_type = msg_type,
         uniq_msg_id = uniq_msg_id,
-        sender_ip = IPv4Address(sender_ip),
+        sender_ip = sender_ip,
         old_message_ids = old_message_ids,
         sender_nick = sender_nick)
 
@@ -202,8 +201,8 @@ def unpack_join_reply_message(data: bytes):
             f"={old_msgs_length}Q", data, offset=offset) )
     offset += 8 * old_msgs_length
 
-    ip_addresses = list( map(IPv4Address, unpack_from(
-            f"={ip_addrs_length}L", data, offset=offset)) )
+    ip_addresses = list( unpack_from(
+            f"={ip_addrs_length}L", data, offset=offset) )
 
     return JoinReplyMessage(
         msg_type = msg_type,
@@ -256,7 +255,7 @@ def unpacker(data: bytes):
             return KeepaliveRelayMessage(
                 msg_type = msg_type,
                 uniq_msg_id = uniq_msg_id,
-                sender_ip = IPv4Address(sender_ip))
+                sender_ip = sender_ip)
 
         case MessageType.JOIN_REQUEST:
             return unpack_join_request_message(data)

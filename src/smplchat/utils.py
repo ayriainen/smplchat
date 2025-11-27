@@ -1,5 +1,6 @@
 """ smplchat.utils - collection of small helper function """
 import socket
+import struct
 from random import getrandbits
 from time import time
 from sys import stderr
@@ -29,3 +30,9 @@ def get_my_ip():
     ip = s.getsockname()[0]
     s.close()
     return ip
+
+def ip_to_int(data: bytes):
+    return struct.unpack("=L", data)[0]
+
+def int_to_ip(n: int):
+    return struct.pack("=L", n)

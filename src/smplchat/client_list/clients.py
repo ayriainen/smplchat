@@ -1,25 +1,24 @@
 """ clients - ClientList class is defined here """
-from ipaddress import IPv4Address
 from time import time
 from random import sample
 from smplchat.settings import NODE_TIMEOUT
 
 class ClientList:
     """ Adds, Removes, and Timeouts other nodes addresses """
-    def __init__(self, own_ip:IPv4Address):
-        self.__own: IPv4Address = own_ip
-        self.__iplist: dict[IPv4Address, int] = {}
+    def __init__(self, own_ip):
+        self.__own = own_ip
+        self.__iplist = {}
 
-    def add(self, ip_addr:IPv4Address):
+    def add(self, ip_addr):
         """ Adds ip address to the list or updates timestamp """
         if ip_addr != self.__own:
-            self.__iplist[ip_addr] = int(time())
+            self.__iplist[int(ip_addr)] = int(time())
 
-    def add_list(self, ip_addresses: list[IPv4Address]):
+    def add_list(self, ip_addresses: list[int]):
         """ Adds list of ip addresses to the list """
         (self.add(x) for x in ip_addresses)
 
-    def remove(self, ip_addr: IPv4Address):
+    def remove(self, ip_addr):
         """ Just removes ip from the list. For example on leave """
         self.__iplist.pop(ip_addr, None)
 
@@ -34,9 +33,9 @@ class ClientList:
             if cur_ts - ts > NODE_TIMEOUT:
                 del self.__iplist[ip_addr]
 
-    def get(self, n=2) -> list[IPv4Address]:
+    def get(self, n = 2):
         """ Returns random n-list of ip addresses currently involved """
         peers = list(self.__iplist.keys())
         if len(peers) <= n:
             return peers
-        return sample(peers, n)
+        return [sample(peers, n)]

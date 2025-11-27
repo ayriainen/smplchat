@@ -1,6 +1,4 @@
 """start input helper, could be in some misc or utils folder too"""
-from ipaddress import IPv4Address
-
 from smplchat import settings
 
 def parse_host_port(s):
@@ -30,13 +28,18 @@ def prompt_nick() -> str:
     return input_nick or "anon"
 
 def prompt_self_addr(
-        default_host="127.0.0.1",
-) -> IPv4Address:
+    default_host="127.0.0.1",
+    default_port=None,
+) -> tuple[str, int]:
     """Prompts host:port at start."""
-    print(f"Enter your own address (leave empty for default {default_host})")
+    if default_port is None:
+        default_port = settings.PORT
+
+    default_str = f"{default_host}:{default_port}"
+    print(f"Enter your own address as ip:port (leave empty for default {default_str})")
     addr_in = input("Your address: ").strip()
 
     if not addr_in:
-        return IPv4Address(default_host)
+        return (default_host, default_port)
 
-    return IPv4Address(addr_in)
+    return parse_host_port(addr_in)

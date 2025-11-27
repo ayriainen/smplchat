@@ -1,6 +1,6 @@
 import socket
 import threading
-from ipaddress import IPv4Address
+import struct
 from threading import Lock
 
 from smplchat import settings
@@ -8,7 +8,7 @@ from smplchat import settings
 class Listener:
 
     def __init__(self):
-        self.__msg_queue: list[tuple[bytes, tuple[IPv4Address, int]]] = []
+        self.__msg_queue: list[tuple[bytes, tuple[str, int]]] = []
         self.__msg_lock: Lock = threading.Lock()
 
         self.__port = settings.PORT
@@ -30,16 +30,17 @@ class Listener:
         while not self.__stop:
             try:
                 data, addr = self._sock.recvfrom(10000)
-                addr = (IPv4Address(addr[0]), addr[1])
-                self.__append_msg(data, addr)
+                self.__append_msg(
+                    data,
+                    int(struct.unpack("=L", socket.inet_aton(addr[0]))[0]) )
             except BlockingIOError as _:
                 pass
 
-    def __append_msg(self, data: bytes, addr: tuple[IPv4Address, int]):
+    def __append_msg(self, data: bytes, ip_addr: int):
         with self.__msg_lock:
-            self.__msg_queue.append((data, addr))
+            self.__msg_queue.append((data, ip_addr))
 
-    def get_messages(self) -> list[tuple[bytes, tuple[IPv4Address, int]]]:
+    def get_messages(self) -> list[(bytes, int)]:
         ret = []
         with self.__msg_lock:
             ret = self.__msg_queue
