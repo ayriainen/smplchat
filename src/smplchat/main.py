@@ -33,6 +33,8 @@ def main():
 
     tui = UserInterface(msg_list, nick)
 
+    msg_list.sys_message( f"*** Your IP: {socket.inet_ntoa(int_to_ip(self_ip))}" )
+
     try:
         while True:
 
