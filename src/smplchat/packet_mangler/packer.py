@@ -1,6 +1,6 @@
 """ smplchat.packet_mangler.packer - functions to form data from message classes """
 from struct import pack, unpack, unpack_from
-from smplchat.settings import dprint
+from smplchat.utils import dprint
 from smplchat.message import (
     MessageType,
     Message,
