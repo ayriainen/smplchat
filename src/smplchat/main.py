@@ -44,7 +44,6 @@ def main():
                         sender.send(msg, client_list.get())
                         msg_list.add(msg)
                 if msg.msg_type == 128: #join request
-                    dprint("REMOTE_IP", remote_ip)
                     msg_list.sys_message(
                             f"*** Join request from <{msg.sender_nick}>, "
                             f"IP: {socket.inet_ntoa(int_to_ip(remote_ip))}")
@@ -59,6 +58,9 @@ def main():
                             msg_list=msg_list )
                     sender.send(out_msg, client_list.get())
                 if msg.msg_type == 129: #join reply
+                    msg_list.sys_message(
+                            f"*** Join accepted {socket.inet_ntoa(int_to_ip(remote_ip))} ")
+                    client_list.add(remote_ip)
                     # TODO: Do the old messages
                     client_list.add_list(msg.ip_addresses)
             client_list.update()
