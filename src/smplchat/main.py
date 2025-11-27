@@ -1,6 +1,8 @@
 """ main.py - smplchat """
-import socket
-from smplchat.input_utils import prompt_nick, prompt_self_addr
+from ipaddress import IPv4Address
+
+from smplchat.client_list import ClientList
+from smplchat.input_utils import prompt_nick
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.sender import Sender
@@ -14,10 +16,10 @@ def main():
     """ main - the entry point to the application """
 
     print("Welcome to smplchat!\n")
-    
-    self_ip = socket.inet_aton(get_my_ip())
 
-    dprint(f"INFO: Got ip-address {socket.inet_ntoa(self_ip)}")
+    self_ip = IPv4Address(get_my_ip())
+
+    dprint(f"INFO: Got ip-address {self_ip}")
 
     # prompt nickname
     nick = prompt_nick()
@@ -66,8 +68,8 @@ def main():
             elif intxt.startswith("/join"):
                 msg = new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick)
                 try:
-                    remote_ip = socket.inet_aton(intxt.split()[1])
-                    msg_list.sys_message(f"*** Join request sent to {socket.inet_ntoa(remote_ip)}")
+                    remote_ip = IPv4Address(intxt.split()[1])
+                    msg_list.sys_message(f"*** Join request sent to {remote_ip}")
                 except:
                     msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
                 sender.send(msg, [remote_ip])

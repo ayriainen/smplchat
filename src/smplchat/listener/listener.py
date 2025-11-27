@@ -1,5 +1,6 @@
 import socket
 import threading
+from ipaddress import IPv4Address
 from threading import Lock
 
 from smplchat import settings
