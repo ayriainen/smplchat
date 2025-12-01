@@ -1,6 +1,5 @@
 """ main.py - smplchat """
 from ipaddress import IPv4Address, AddressValueError
-import socket
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
@@ -62,6 +61,14 @@ def main():
                     client_list.add(remote_ip)
                     # TODO: Do the old messages # pylint: disable=["fixme"]
                     client_list.add_list(msg.ip_addresses)
+                if msg.msg_type == MessageType.OLD_REPLY:
+                    msg_list.add(msg)
+                if msg.msg_type == MessageType.OLD_REQUEST:
+                    found = msg_list.get_by_uid(msg.uniq_msg_id)
+                    if found is not None:
+                        msg = new_message(MessageType.OLD_REPLY, old_type=found.mtype, uid=msg.uniq_msg_id,
+                                          nick=found.nick, text=found.message)
+                        dispatcher.send(msg, [remote_ip])
             client_list.update()
 
             # Process input from UI
@@ -106,6 +113,12 @@ def main():
                         text=intxt, ip=self_ip, msg_list=msg_list)
                 msg_list.add(msg)
                 dispatcher.send(msg, client_list.get())
+
+            # Fetch missing messages from peers
+            waiting_message = msg_list.get_waiting_message()
+            if waiting_message is not None:
+                msg = new_message(MessageType.OLD_REQUEST, uid=waiting_message)
+                dispatcher.send(msg,client_list.get(1))
     finally:
         # exit cleanup
         listener.stop()
