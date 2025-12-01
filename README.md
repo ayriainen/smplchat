@@ -18,9 +18,15 @@ poetry run smplchat
 
 ## Testing
 
+### Basic tests
+
+The project has Pytests and Pylint (with Coverage) set up. They are ran by dev.sh which is also used in the GitHub workflow.
+
+### Operating multiple clients locally
+
 You can test multiple clients on your own locally with Docker running.
 
-In root, run:
+In root, run this to build a Docker image of the app:
 ```
 docker build -t smplchat .
 ```
@@ -30,8 +36,9 @@ Then in however many terminals with this command we start a container and also s
 ```
 docker run -it --rm smplchat
 ```
+All the containers get their own IP that you can use for the /join command.
 
-The image gets built with code changes but if you want to remove it run:
+You can run the build command again for any code changes, but if you want to remove the image, run:
 ```
 docker rmi smplchat
 ```
