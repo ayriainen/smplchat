@@ -13,7 +13,7 @@ class ClientList:
     def add(self, ip_addr:IPv4Address):
         """ Adds ip address to the list or updates timestamp """
         if ip_addr != self.__own:
-            self.__iplist[int(ip_addr)] = int(time())
+            self.__iplist[ip_addr] = int(time())
 
     def add_list(self, ip_addresses: list[IPv4Address]):
         """ Adds list of ip addresses to the list """
@@ -35,7 +35,7 @@ class ClientList:
             if cur_ts - ts > NODE_TIMEOUT:
                 del self.__iplist[ip_addr]
 
-    def get(self, n = 2) -> list[IPv4Address]::
+    def get(self, n = 2) -> list[IPv4Address]:
         """ Returns random n-list of ip addresses currently involved """
         peers = list(self.__iplist.keys())
         if len(peers) <= n:

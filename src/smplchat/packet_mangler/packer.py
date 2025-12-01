@@ -1,4 +1,5 @@
 """ smplchat.packet_mangler.packer - functions to form data from message classes """
+from ipaddress import IPv4Address
 from struct import pack, unpack, unpack_from
 from smplchat.utils import dprint
 from smplchat.message import (
@@ -21,13 +22,13 @@ def packer(m: Message):
         sender_nick = m.sender_nick.encode()
         msg_text = m.msg_text.encode()
         return pack(
-            "=BQLLLL"
+            "=BQ4sLLL"
                 f"{len(m.old_message_ids)}Q"
                 f"{len(sender_nick)}s"
                 f"{len(msg_text)}s",
             m.msg_type,					# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
-            m.sender_ip.packed,				# L - 4 bytes
+            m.sender_ip.packed,				# 4s- 4 bytes
             len(m.old_message_ids),			# L - 4 bytes
             len(sender_nick),				# L - 4 bytes
             len(msg_text),				# L - 4 bytes
@@ -39,12 +40,12 @@ def packer(m: Message):
     if isinstance(m, (JoinRelayMessage, LeaveRelayMessage)):
         sender_nick = m.sender_nick.encode()
         return pack(
-            "=BQLLL"
+            "=BQ4sLL"
                 f"{len(m.old_message_ids)}Q"
                 f"{len(sender_nick)}s",
             m.msg_type,					# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
-            m.sender_ip.packed,				# L - 4 bytes
+            m.sender_ip.packed,				# 4s - 4 bytes
             len(m.old_message_ids),			# L - 4 bytes
             len(sender_nick),				# L - 4 bytes
 
@@ -70,16 +71,19 @@ def packer(m: Message):
             sender_nick)				# ?s - ? chars (bytes)
 
     if isinstance(m, JoinReplyMessage):
+        ips = bytearray()
+        for ip in m.ip_addresses:
+            ips += ip.packed
         return pack(
             "=BLL"
                 f"{len(m.old_message_ids)}Q"
-                f"{len(m.ip_addresses)}L",
+                f"{len(m.ip_addresses*4)}s",
             m.msg_type,					# B - 1 byte
             len(m.old_message_ids),			# L - 4 bytes
             len(m.ip_addresses),			# L - 4 bytes
 
             *m.old_message_ids,				# ?Q - ? x 8 bytes
-            *[ip.packed for ip in m.ip_addresses]	# ?L - ? x 4 bytes
+            ips)					# ?s - ? x 4 bytes
 
     if isinstance(m, OldRequestMessage):
         return pack(
@@ -206,7 +210,7 @@ def unpack_join_reply_message(data: bytes):
     return JoinReplyMessage(
         msg_type = msg_type,
         old_message_ids = old_message_ids,
-        ip_addresses = IPv4Address(ip_addresses))
+        ip_addresses = ip_addresses)
 
 
 def unpack_old_reply_message(data: bytes):

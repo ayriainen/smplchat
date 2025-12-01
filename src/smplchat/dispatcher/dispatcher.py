@@ -4,7 +4,6 @@ from socket import socket, AF_INET, SOCK_DGRAM
 from smplchat.settings import PORT
 from smplchat.packet_mangler import packer
 from smplchat.message import Message
-from smplchat.utils import int_to_ip
 
 class Dispatcher:
     """ Class for sending UPD packets """

@@ -1,5 +1,5 @@
 """ main.py - smplchat """
-from ipaddress import IPv4Address
+from ipaddress import IPv4Address, AddressValueError
 import socket
 from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
@@ -93,11 +93,12 @@ def main():
                 remote_ip = None
                 try:
                     remote_ip = IPv4Address(intxt.split()[1])
-                except OSError:
+                except IndexError:
+                    msg_list.sys_message(f"*** Join needs address")
+                except AddressValueError:
                     msg_list.sys_message(f"*** Malformed address {intxt.split()[1]}")
                 if remote_ip:
-                    msg_list.sys_message("*** Join request sent to "
-                            f"{socket.inet_ntoa(int_to_ip(remote_ip))}")
+                    msg_list.sys_message(f"*** Join request sent to {str(remote_ip)}")
                     dispatcher.send(msg, [remote_ip])
 
             else: # only text to send
