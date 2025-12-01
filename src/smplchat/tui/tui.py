@@ -126,7 +126,7 @@ class UserInterface:
                     completed = text
                 break
             # is backspace
-            if ch in (curses.KEY_BACKSPACE, 127, 0):
+            if ch in (curses.KEY_BACKSPACE, 127, 8, '\b', '\x7f'):
                 if self._state.cursor_pos > 0:
                     self._state.input_buffer = (
                         self._state.input_buffer[: self._state.cursor_pos -1]
