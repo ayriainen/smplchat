@@ -8,13 +8,13 @@ from smplchat import settings
 
 class Listener:
     """ Listener - a class for receiving UDP packets """
-    def __init__(self):
+    def __init__(self, self_ip: IPv4Address = IPv4Address("0.0.0.0")):
         self.__msg_queue: list[tuple[bytes, tuple[str, IPv4Address]]] = []
         self.__msg_lock: Lock = threading.Lock()
 
         self.__port = settings.PORT
         self._sock = socket.socket(type=socket.SOCK_DGRAM)
-        address = ("", self.__port)
+        address = (str(self_ip), self.__port)
         self._sock.bind(address)
         self._sock.setblocking(False)
 
