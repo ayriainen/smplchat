@@ -38,6 +38,7 @@ def main():
             for rx_msg, remote_ip in listener.get_messages():
                 msg = unpacker(rx_msg)
                 if msg.msg_type < 128: #relay message
+                    client_list.add(remote_ip) # keep keep-alive-counter happy
                     if not msg_list.is_seen(msg.uniq_msg_id):
                         dispatcher.send(msg, client_list.get())
                         msg_list.add(msg)
