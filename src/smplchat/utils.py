@@ -1,6 +1,5 @@
 """ smplchat.utils - collection of small helper function """
 import socket
-import struct
 from ipaddress import IPv4Address
 from random import getrandbits
 from time import time

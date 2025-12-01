@@ -35,9 +35,11 @@ class ClientList:
             if cur_ts - ts > NODE_TIMEOUT:
                 del self.__iplist[ip_addr]
 
-    def get(self, n = 2) -> list[IPv4Address]:
+    def get(self, n = 2, exclude: IPv4Address = None) -> list[IPv4Address]:
         """ Returns random n-list of ip addresses currently involved """
         peers = list(self.__iplist.keys())
+        if exclude and exclude in peers:
+            peers.remove(exclude)
         if len(peers) <= n:
             return peers
         return sample(peers, n)
