@@ -147,7 +147,10 @@ class MessageList:
             return True
 
         if isinstance(msg, JoinReplyMessage):
-            self.sys_message("*** Join request succesful")
+            waiting_for = map(lambda x: WaitingMessageEntry(uid=x, last_tried=datetime.now(), fetch_count=0),
+                              msg.old_message_ids)
+            self.__messages += waiting_for
+            self.sys_message("*** Join request successful")
             self.updated = True
             return True
 
