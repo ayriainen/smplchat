@@ -2,6 +2,23 @@
 
 This project is a group work for master level course Distributed Systems at University of Helsinki. The main goal of this project is to design a large scale distributed system that has a global state, provides data consistensy and synchronization, has mechanisms for reaching consensus, is fault tolerant and scalable. The implementation of the designed system is done in small scale.
 
+```mermaid
+graph TB
+    N1((Node 1))
+    N2((Node 2))
+    N3((Node 3))
+    N4((New Node))
+    
+    N4 -->|"/join IP"| N2
+    N2 -->|"IPs + History"| N4
+    N2 -.-> N1
+    N2 -.-> N3
+    N1 -.-> N2
+    N3 -.-> N2
+    N3 -.-> N1
+    N1 -.-> N3
+```
+
 ## Operation
 
 Run in terminal from the project folder.
