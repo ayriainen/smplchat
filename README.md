@@ -27,6 +27,7 @@ Install via:
 ```
 poetry install
 ```
+And if you want to disclude the dev dependencies, give it the flag " --without dev".
 
 Run the app via:
 ```
@@ -37,7 +38,7 @@ poetry run smplchat
 
 ### Basic tests
 
-The project has Pytests and Pylint (with Coverage) set up. They are ran by dev.sh which is also used in the GitHub workflow.
+The project has Pytests (with Coverage) and Pylint set up. They are ran by dev.sh which is also used in the GitHub workflow.
 
 ### Operating multiple clients locally
 
