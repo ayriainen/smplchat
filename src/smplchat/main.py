@@ -46,10 +46,10 @@ def main():
                     if not seen or seen < 2: # resend first 2 times
                         # orginal sender is alive so add to the list
                         client_list.add(msg.sender_ip)
+                        # relay messages to other peers
                         dispatcher.send(
                                 msg, client_list.get(exclude=remote_ip))
-                        if msg.msg_type != MessageType.KEEPALIVE_RELAY:
-                            msg_list.add(msg)
+                        msg_list.add(msg) # add or update seend count
 
                 elif msg.msg_type == MessageType.JOIN_REQUEST:
                     msg_list.sys_message(

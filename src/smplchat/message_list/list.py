@@ -10,7 +10,8 @@ from smplchat.message import (
     JoinRelayMessage,
     LeaveRelayMessage,
     JoinReplyMessage,
-    OldReplyMessage)
+    OldReplyMessage,
+    KeepaliveRelayMessage)
 from smplchat.utils import (
     dprint, get_time_from_uid)
 
@@ -39,6 +40,11 @@ class WaitingMessageEntry:
     fetch_count: int
     last_tried: datetime
 
+@dataclass
+class KeepaliveMessageEntry:
+    uid: int
+    seen: int
+
 
 @dataclass
 class GivenUpMessageEntry:
@@ -51,7 +57,7 @@ class SystemMessageEntry:
     timestamp: datetime
 
 
-MessageEntry: TypeAlias = FullMessageEntry | WaitingMessageEntry | GivenUpMessageEntry | SystemMessageEntry
+MessageEntry: TypeAlias = FullMessageEntry | WaitingMessageEntry | GivenUpMessageEntry | SystemMessageEntry | KeepaliveMessageEntry
 
 
 class MessageList:
@@ -154,6 +160,11 @@ class MessageList:
             self.updated = True
             return True
 
+        if isinstance(msg, KeepaliveRelayMessage):
+            self.__messages.append(KeepaliveMessageEntry(
+                uid=msg.uniq_msg_id, seen=1 ))
+            return True
+
         dprint("ERROR: Message type is not supported by MessagList")
         dprint(msg)
         return False
@@ -234,9 +245,9 @@ class MessageList:
             if isinstance(msg, SystemMessageEntry):
                 time_str = (msg.timestamp.strftime("%H:%M:%S"))
                 return f"[{time_str}] [System] {msg.message}"
-            return ""
-
-        return list(map(__message_to_string, self.__messages))
+            return None
+        
+        return [ x for x in map(__message_to_string, self.__messages) if x ]
 
     def get_by_uid(self, uid: int) -> FullMessageEntry | None:
         for entry in self.__messages:
