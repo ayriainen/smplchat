@@ -161,6 +161,12 @@ class MessageList:
             return True
 
         if isinstance(msg, KeepaliveRelayMessage):
+            # check if we have the uid already
+            pos = self.find(msg.uniq_msg_id)
+            if pos is not None and isinstance(self.__messages[pos], KeepaliveMessageEntry):
+                self.__messages[pos].seen += 1
+                return True
+            # if new, add
             self.__messages.append(KeepaliveMessageEntry(
                 uid=msg.uniq_msg_id, seen=1 ))
             return True
@@ -186,15 +192,10 @@ class MessageList:
     def is_seen(self, uid: int):
         """ is_seen - Returns how many times uid is seen """
         for m in self.__messages:
-            if isinstance(m, FullMessageEntry):
-                if m.uid == uid:
-                    return m.seen
-            elif isinstance(m, WaitingMessageEntry):
-                if m.uid == uid:
-                    return 0
-            elif isinstance(m, GivenUpMessageEntry):
-                if m.uid == uid:
-                    return 0
+            if isinstance(m, (FullMessageEntry, KeepaliveMessageEntry)) and m.uid == uid:
+                return m.seen
+            if isinstance(m, (WaitingMessageEntry, GivenUpMessageEntry)) and m.uid == uid:
+                return 0
         return None
 
     def get(self):

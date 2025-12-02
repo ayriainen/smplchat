@@ -1,16 +1,20 @@
 import unittest
-
-from smplchat.message_list import (
-    MessageList,
-    MessageEntry)
+from ipaddress import IPv4Address
+from smplchat.message_list import MessageList
 from smplchat.message import (
     ChatRelayMessage,
     JoinRelayMessage,
     LeaveRelayMessage,
     JoinReplyMessage,
     JoinRequestMessage,
-    OldReplyMessage)
-from smplchat.message_list.list import FullMessageEntry, WaitingMessageEntry, SystemMessageEntry
+    OldReplyMessage,
+    KeepaliveRelayMessage,
+    MessageType)
+from smplchat.message_list.list import (
+    FullMessageEntry,
+    WaitingMessageEntry,
+    SystemMessageEntry,
+    KeepaliveMessageEntry)
 
 
 class TestMessageList(unittest.TestCase):
@@ -97,6 +101,12 @@ class TestMessageList(unittest.TestCase):
             uniq_msg_id=13,
             sender_nick="vastaamo",
             msg_text="sitä saa mitä kysyy"))
+
+    def add_keepalive(self, uid=999):
+        self.ml.add(KeepaliveRelayMessage(
+            msg_type=MessageType.KEEPALIVE_RELAY,
+            uniq_msg_id=uid,
+            sender_ip=IPv4Address("22.2.2.2")))
 
     def test_add(self):
         self.ml = MessageList()
@@ -217,3 +227,14 @@ class TestMessageList(unittest.TestCase):
         self.ml = MessageList()
         self.add_old_reply()
         self.assertEqual(self.ml.get(), [])
+
+    def test_keepalive_seen_duplicates(self):
+        self.ml = MessageList()
+        self.add_keepalive(uid=999)
+        self.add_keepalive(uid=999)
+        self.add_keepalive(uid=999)
+        keepalive_entries = [m for m in self.ml.get()
+                            if isinstance(m, KeepaliveMessageEntry)]
+        self.assertEqual(len(keepalive_entries), 1)
+        self.assertEqual(keepalive_entries[0].uid, 999)
+        self.assertEqual(keepalive_entries[0].seen, 3)
