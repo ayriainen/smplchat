@@ -5,12 +5,20 @@ from sys import stderr
 if "DEBUG" not in globals():
     DEBUG = getenv("DEBUG")
 
-if "PORT" not in globals():
+if "SMPLCHAT_PORT" not in globals():
     try:
-        PORT = int(getenv("SMPLCHAT_PORT") or 62733)
+        SMPLCHAT_PORT = int(getenv("SMPLCHAT_PORT") or 62733)
     except ValueError:
-        PORT = 62733
+        SMPLCHAT_PORT = 62733
         print("Ignoring invalid SMPLCHAT_PORT enviromental variable",
+                file=stderr)
+
+if "SMPLCHAT_DROP_PERCENT" not in globals():
+    try:
+        SMPLCHAT_DROP_PERCENT = int(getenv("SMPLCHAT_DROP_PERCENT") or 0)
+    except ValueError:
+        SMPLCHAT_DROP_PERCENT = 0
+        print("Ignoring invalid SMPLCHAT_DROP_PERCENT enviromental variable",
                 file=stderr)
 
 NODE_TIMEOUT = 300	# After 300s we can assume connection is lost

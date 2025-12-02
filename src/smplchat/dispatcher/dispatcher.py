@@ -1,8 +1,8 @@
 """ Dispatch - Just simple UDP data sending class """
-import random
+from random import random
 from ipaddress import IPv4Address
 from socket import socket, AF_INET, SOCK_DGRAM
-from smplchat.settings import PORT
+from smplchat.settings import SMPLCHAT_PORT, SMPLCHAT_DROP_PERCENT
 from smplchat.packet_mangler import packer
 from smplchat.message import Message
 
@@ -15,9 +15,9 @@ class Dispatcher:
         """ Method for sending a UPD packet """
 
         #FOR TESTING: Drop packets intentionally to simulate unreliable network
-        #if random.random() < 0.5:
-        #    return
+        if SMPLCHAT_DROP_PERCENT and random()*100 < SMPLCHAT_DROP_PERCENT:
+            return
 
         with socket(AF_INET, SOCK_DGRAM) as sock:	# new UDP socket
             for ip in ips:
-                sock.sendto( packer(msg), (str(ip), PORT) )
+                sock.sendto( packer(msg), (str(ip), SMPLCHAT_PORT) )

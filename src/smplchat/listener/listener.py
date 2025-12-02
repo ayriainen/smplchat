@@ -4,7 +4,7 @@ import threading
 from ipaddress import IPv4Address
 from threading import Lock
 
-from smplchat import settings
+from smplchat.settings import SMPLCHAT_PORT
 
 class Listener:
     """ Listener - a class for receiving UDP packets """
@@ -12,7 +12,7 @@ class Listener:
         self.__msg_queue: list[tuple[bytes, tuple[str, IPv4Address]]] = []
         self.__msg_lock: Lock = threading.Lock()
 
-        self.__port = settings.PORT
+        self.__port = SMPLCHAT_PORT
         self._sock = socket.socket(type=socket.SOCK_DGRAM)
         address = (str(self_ip), self.__port)
         self._sock.bind(address)
