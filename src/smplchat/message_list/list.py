@@ -85,7 +85,7 @@ class MessageList:
         return new_entries
 
 
-    def __update_message(self, uid, mtype, nick, message):
+    def __update_message(self, uid, mtype = None, nick = None, message = None):
         pos = self.find(uid)
         if pos is not None:
             entry = self.__messages[pos]
@@ -99,7 +99,7 @@ class MessageList:
                     message=message)
                 self.updated = True
                 return True
-            if isinstance(entry, FullMessageEntry):
+            elif isinstance(entry, FullMessageEntry):
                 seen = entry.seen
                 self.__messages[pos] = FullMessageEntry(
                     uid=entry.uid,
@@ -108,7 +108,7 @@ class MessageList:
                     nick=entry.nick,
                     message=entry.message)
                 return True
-            if isinstance(entry, KeepaliveMessageEntry):
+            elif isinstance(entry, KeepaliveMessageEntry):
                 seen = entry.seen
                 self.__messages[pos] = KeepaliveMessageEntry(
                     uid=entry.uid,
@@ -167,14 +167,9 @@ class MessageList:
             return True
 
         if isinstance(msg, KeepaliveRelayMessage):
-            # check if we have the uid already
-            pos = self.find(msg.uniq_msg_id)
-            if pos is not None and isinstance(self.__messages[pos], KeepaliveMessageEntry):
-                self.__messages[pos].seen += 1
-                return True
-            # if new, add
-            self.__messages.append(KeepaliveMessageEntry(
-                uid=msg.uniq_msg_id, seen=1 ))
+            if not self.__update_message(msg.uniq_msg_id): # update if possible
+                self.__messages.append(KeepaliveMessageEntry(
+                        uid=msg.uniq_msg_id, seen=1 ))
             return True
 
         dprint("ERROR: Message type is not supported by MessagList")
