@@ -50,8 +50,9 @@ def main():
             for rx_msg, remote_ip in listener.get_messages():
                 msg = unpacker(rx_msg)
                 if isinstance(msg, KeepaliveRelayMessage):
+                    client_list.add(msg.sender_ip) # keepalive sender is alive
                     if keepalive_list.seen_count(msg.uniq_msg_id) < 2:
-                        dispatcher.send(msg, client_list.get(exclude=remote_ip))
+                        dispatcher.send(msg,client_list.get(exclude=remote_ip))
                     keepalive_list.add(msg.uniq_msg_id)
 
                 elif is_relay_message(msg):
