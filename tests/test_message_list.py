@@ -86,7 +86,6 @@ class TestMessageList(unittest.TestCase):
 
     def add_old_reply(self):
         self.ml.add(OldReplyMessage(
-            old_msg_type=0,
             uniq_msg_id=13,
             sender_nick="vastaamo",
             msg_text="sitä saa mitä kysyy"))

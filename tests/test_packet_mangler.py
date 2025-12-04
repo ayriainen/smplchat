@@ -76,7 +76,6 @@ class TestPacker(unittest.TestCase):
     def test_old_reply_message(self):
         for _ in range(200):
             tm = OldReplyMessage(
-                old_msg_type = choice(list(MessageType)),
                 uniq_msg_id = randrange(0,99999999),
                 sender_nick = "".join(chr(randrange(1,4000))
                         for x in range(randrange(70))),

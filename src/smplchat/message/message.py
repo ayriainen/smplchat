@@ -71,7 +71,6 @@ class OldRequestMessage(Message):
 @dataclass
 class OldReplyMessage(Message):
     """ old reply message - reply for old message request """
-    old_msg_type: int
     uniq_msg_id: int
     sender_nick: str
     msg_text: str

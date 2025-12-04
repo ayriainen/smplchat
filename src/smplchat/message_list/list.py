@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import TypeAlias, List
 
 from smplchat.message import (
-    MessageType,
     Message,
     ChatRelayMessage,
     JoinRelayMessage,
@@ -48,7 +47,11 @@ class SystemMessageEntry:
     timestamp: datetime
 
 
-MessageEntry: TypeAlias = FullMessageEntry | WaitingMessageEntry | GivenUpMessageEntry | SystemMessageEntry
+MessageEntry: TypeAlias = (
+        FullMessageEntry
+        | WaitingMessageEntry
+        | GivenUpMessageEntry
+        | SystemMessageEntry )
 
 
 class MessageList:
@@ -101,14 +104,11 @@ class MessageList:
 
     def __generate_message(self, msg):
         """ generates message to be diplayed according message type """
-        ot = None
-        if isinstance(msg, OldReplyMessage):
-            ot = msg.old_msg_type
-        if isinstance(msg, ChatRelayMessage) or ot==MessageType.CHAT_RELAY:
+        if isinstance(msg, (OldReplyMessage, ChatRelayMessage)):
             return msg.msg_text
-        elif isinstance(msg, JoinRelayMessage) or ot==MessageType.JOIN_RELAY:
+        elif isinstance(msg, JoinRelayMessage):
             return "*** joined the chat"
-        elif isinstance(msg, LeaveRelayMessage) or ot==MessageType.LEAVE_RELAY:
+        elif isinstance(msg, LeaveRelayMessage):
             return "*** left the chat"
         return ""
 
@@ -118,7 +118,6 @@ class MessageList:
                 LeaveRelayMessage, OldReplyMessage)):
             uid = msg.uniq_msg_id
             nick = msg.sender_nick
-            text = msg.msg_text if hasattr(msg, "msg_text") else ""
             message = self.__generate_message(msg)
 
             if self.__update_message(uid, nick, message):
@@ -224,7 +223,7 @@ class MessageList:
                 time_str = (msg.timestamp.strftime("%H:%M:%S"))
                 return f"[{time_str}] [System] {msg.message}"
             return None
-        
+
         return [ x for x in map(__message_to_string, self.__messages) if x ]
 
     def get_by_uid(self, uid: int) -> FullMessageEntry | None:

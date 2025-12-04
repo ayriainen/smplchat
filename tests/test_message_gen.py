@@ -203,35 +203,22 @@ class TestMessageGen(unittest.TestCase):
         with unittest.mock.patch.object(message_gen, "generate_uid", return_value=999):
             msg = message_gen.new_message(
                 MessageType.OLD_REPLY,
-                old_type=MessageType.CHAT_RELAY,
                 uid=55,
                 nick="parta",
                 text="Punainen vai sininen!?"
             )
 
             self.assertIsInstance(msg, OldReplyMessage)
-            self.assertEqual(msg.old_msg_type, MessageType.CHAT_RELAY)
-            self.assertEqual(msg.old_msg_type, 0)
             self.assertEqual(msg.uniq_msg_id, 55)
             self.assertEqual(msg.sender_nick, "parta")
             self.assertEqual(msg.msg_text, "Punainen vai sininen!?")
 
     def test_old_reply_missing_type_uid(self):
 
-        # no type
-        with self.assertRaises(KeyError):
-            message_gen.new_message(
-                MessageType.OLD_REPLY,
-                uid=55,
-                nick="huba",
-                text="ttt"
-            )
-
         # no uid
         with self.assertRaises(KeyError):
             message_gen.new_message(
                 MessageType.OLD_REPLY,
-                old_type=MessageType.CHAT_RELAY,
                 nick="huba",
                 text="ttt"
             )

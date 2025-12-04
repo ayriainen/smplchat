@@ -24,7 +24,6 @@ def new_message(msg_type: MessageType, **kwargs):
                           for gathiring information of past messages
         client_list	- Needed only in JOIN_REPLY
         uid		- uid of message. Needen in OLD_REQUEST and OLD_REPLY
-        old_type		- Type on old message. Needed in OLD_REPLY
     """
     uid = generate_uid()
     try:
@@ -73,7 +72,6 @@ def new_message(msg_type: MessageType, **kwargs):
 
             case MessageType.OLD_REPLY:
                 return OldReplyMessage(
-                    old_msg_type = kwargs["old_type"],
                     uniq_msg_id = kwargs["uid"],
                     sender_nick = kwargs["nick"],
                     msg_text = kwargs["text"] )

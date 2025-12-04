@@ -96,11 +96,10 @@ def packer(m: Message):
         sender_nick = m.sender_nick.encode()
         msg_text = m.msg_text.encode()
         return pack(
-            "!BBQLL"
+            "!BQLL"
                 f"{len(sender_nick)}s"
                 f"{len(msg_text)}s",
             MessageType.OLD_REPLY,			# B - 1 byte
-            m.old_msg_type,				# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
             len(sender_nick),				# L - 4 bytes
             len(msg_text),				# L - 4 bytes
@@ -213,12 +212,11 @@ def unpack_join_reply_message(data: bytes):
 def unpack_old_reply_message(data: bytes):
     """ unpacker for chat relay messages """
     (_,				# B - 1 byte
-        old_msg_type,		# B - 1 byte
         uniq_msg_id,		# Q - 8 bytes
         nick_length,		# L - 4 bytes
         msg_length) = (		# L - 4 bytes
-            unpack_from("!BBQLL", data) )
-    offset = 18
+            unpack_from("!BQLL", data) )
+    offset = 17
 
     sender_nick = unpack_from(
             f"!{nick_length}s", data, offset=offset)[0].decode()
@@ -228,7 +226,6 @@ def unpack_old_reply_message(data: bytes):
             f"!{msg_length}s", data, offset=offset)[0].decode()
 
     return OldReplyMessage(
-        old_msg_type = old_msg_type,
         uniq_msg_id = uniq_msg_id,
         sender_nick = sender_nick,
         msg_text = msg_text )

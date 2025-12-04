@@ -5,7 +5,15 @@ from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
 from smplchat.tui import UserInterface
-from smplchat.message import *
+from smplchat.message import (
+        MessageType,
+        KeepaliveRelayMessage,
+        JoinRequestMessage,
+        JoinReplyMessage,
+        OldRequestMessage,
+        OldReplyMessage,
+        is_relay_message,
+        new_message)
 from smplchat.client_list import ClientList, KeepaliveList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
