@@ -21,13 +21,11 @@ class FullMessageEntry:
     
         Details:
         uid - unique ID of message
-        mtype - type of message
         seen - counter how many times message is added
         nick - the nick of sender
         message - message content
     """
     uid: int
-    mtype: int
     seen: int
     nick: str
     message: str
@@ -78,7 +76,7 @@ class MessageList:
         return new_entries
 
 
-    def __update_message(self, uid, mtype, nick, message):
+    def __update_message(self, uid, nick, message):
         pos = self.find(uid)
         if pos is not None:
             entry = self.__messages[pos]
@@ -86,7 +84,6 @@ class MessageList:
             if isinstance(entry, (WaitingMessageEntry, GivenUpMessageEntry)):
                 self.__messages[pos] = self.__messages[pos] = FullMessageEntry(
                     uid=uid,
-                    mtype=mtype,
                     seen=1,
                     nick=nick,
                     message=message)
@@ -96,22 +93,23 @@ class MessageList:
                 seen = entry.seen
                 self.__messages[pos] = FullMessageEntry(
                     uid=entry.uid,
-                    mtype=mtype,
                     seen=seen + 1,
                     nick=entry.nick,
                     message=entry.message)
                 return True
         return False
 
-    def __generate_message(self, msg_type, text):
+    def __generate_message(self, msg):
         """ generates message to be diplayed according message type """
-        match msg_type:
-            case MessageType.CHAT_RELAY:
-                return text
-            case MessageType.JOIN_RELAY:
-                return "*** joined the chat"
-            case MessageType.LEAVE_RELAY:
-                return "*** left the chat"
+        ot = None
+        if isinstance(msg, OldReplyMessage):
+            ot = msg.old_msg_type
+        if isinstance(msg, ChatRelayMessage) or ot==MessageType.CHAT_RELAY:
+            return msg.msg_text
+        elif isinstance(msg, JoinRelayMessage) or ot==MessageType.JOIN_RELAY:
+            return "*** joined the chat"
+        elif isinstance(msg, LeaveRelayMessage) or ot==MessageType.LEAVE_RELAY:
+            return "*** left the chat"
         return ""
 
     def add(self, msg: Message):
@@ -120,12 +118,10 @@ class MessageList:
                 LeaveRelayMessage, OldReplyMessage)):
             uid = msg.uniq_msg_id
             nick = msg.sender_nick
-            mtype = ( msg.old_msg_type if hasattr(msg, "old_msg_type")
-                    else msg.msg_type )
             text = msg.msg_text if hasattr(msg, "msg_text") else ""
-            message = self.__generate_message(mtype, text)
+            message = self.__generate_message(msg)
 
-            if self.__update_message(uid, mtype, nick, message):
+            if self.__update_message(uid, nick, message):
                 if hasattr(msg, "old_message_ids"):
                     self.__add_unseen_history(uid, msg.old_message_ids)
                 return True
@@ -136,7 +132,6 @@ class MessageList:
 
             self.__messages.append(FullMessageEntry(
                 uid=uid,
-                mtype=mtype,
                 seen=1,
                 nick=nick,
                 message=message))
@@ -174,11 +169,9 @@ class MessageList:
     def is_seen(self, uid: int):
         """ is_seen - Returns how many times uid is seen """
         for m in self.__messages:
-            if isinstance(m, FullMessageEntry) and m.uid == uid:
-                return m.seen
-            if isinstance(m, (WaitingMessageEntry, GivenUpMessageEntry)) and m.uid == uid:
-                return 0
-        return None
+            if hasattr(m, "uid") and entry.uid == uid:
+                return m.seen or 0
+        return 0
 
     def get(self):
         """ get - Gets current list """

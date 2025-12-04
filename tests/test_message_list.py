@@ -22,7 +22,6 @@ class TestMessageList(unittest.TestCase):
 
     def add_chat1(self):
         self.ml.add(ChatRelayMessage(
-            msg_type=0,
             uniq_msg_id=3,
             sender_ip=55,
             old_message_ids=[],
@@ -31,7 +30,6 @@ class TestMessageList(unittest.TestCase):
 
     def add_chat2(self):
         self.ml.add(ChatRelayMessage(
-            msg_type=0,
             uniq_msg_id=5,
             sender_ip=73,
             old_message_ids=[],
@@ -40,7 +38,6 @@ class TestMessageList(unittest.TestCase):
 
     def add_chat3(self):
         self.ml.add(ChatRelayMessage(
-            msg_type=0,
             uniq_msg_id=5,
             sender_ip=73,
             old_message_ids=[13],
@@ -49,7 +46,6 @@ class TestMessageList(unittest.TestCase):
 
     def add_chat_with_history(self):
         self.ml.add(ChatRelayMessage(
-            msg_type=0,
             uniq_msg_id=55,
             sender_ip=73,
             old_message_ids=[3, 5],
@@ -58,7 +54,6 @@ class TestMessageList(unittest.TestCase):
 
     def add_chat_with_history2(self):
         self.ml.add(ChatRelayMessage(
-            msg_type=0,
             uniq_msg_id=81,
             sender_ip=744,
             old_message_ids=[55],
@@ -67,7 +62,6 @@ class TestMessageList(unittest.TestCase):
 
     def add_join(self):
         self.ml.add(JoinRelayMessage(
-            msg_type=1,
             uniq_msg_id=4,
             sender_ip=62,
             old_message_ids=[],
@@ -75,7 +69,6 @@ class TestMessageList(unittest.TestCase):
 
     def add_leave(self):
         self.ml.add(LeaveRelayMessage(
-            msg_type=2,
             uniq_msg_id=9,
             sender_ip=92,
             old_message_ids=[],
@@ -83,19 +76,16 @@ class TestMessageList(unittest.TestCase):
 
     def add_join_reply(self):
         self.ml.add(JoinReplyMessage(
-            msg_type=129,
             old_message_ids=[3, 5, 9],
             ip_addresses=[0, 1, 2]))
 
     def add_join_request(self):
         self.ml.add(JoinRequestMessage(
-            msg_type=128,
             uniq_msg_id=23579,
             sender_nick="hei_vaan"))
 
     def add_old_reply(self):
         self.ml.add(OldReplyMessage(
-            msg_type=131,
             old_msg_type=0,
             uniq_msg_id=13,
             sender_nick="vastaamo",
@@ -103,7 +93,6 @@ class TestMessageList(unittest.TestCase):
 
     def add_keepalive(self, uid=999):
         self.ml.add(KeepaliveRelayMessage(
-            msg_type=MessageType.KEEPALIVE_RELAY,
             uniq_msg_id=uid,
             sender_ip=IPv4Address("22.2.2.2")))
 
@@ -111,7 +100,7 @@ class TestMessageList(unittest.TestCase):
         self.ml = MessageList()
         self.add_chat1()
         self.assertEqual(self.ml.get(), [
-            FullMessageEntry(uid=3, mtype=0, seen=1,
+            FullMessageEntry(uid=3, seen=1,
                          nick='tester', message='testing yeah')])
 
     def test_addmore(self):
@@ -119,9 +108,9 @@ class TestMessageList(unittest.TestCase):
         self.add_chat1()
         self.add_chat2()
         self.assertEqual(self.ml.get(), [
-            FullMessageEntry(uid=3, mtype=0, seen=1,
+            FullMessageEntry(uid=3, seen=1,
                          nick='tester', message='testing yeah'),
-            FullMessageEntry(uid=5, mtype=0, seen=1,
+            FullMessageEntry(uid=5, seen=1,
                          nick='tester2', message='testing hell yeah'),
         ])
 
@@ -132,13 +121,13 @@ class TestMessageList(unittest.TestCase):
         self.add_join()
         self.add_leave()
         self.assertEqual(self.ml.get(), [
-            FullMessageEntry(uid=3, mtype=0, seen=1,
+            FullMessageEntry(uid=3, seen=1,
                              nick='tester', message='testing yeah'),
-            FullMessageEntry(uid=5, mtype=0, seen=1,
+            FullMessageEntry(uid=5, seen=1,
                              nick='tester2', message='testing hell yeah'),
-            FullMessageEntry(uid=4, mtype=1, seen=1,
+            FullMessageEntry(uid=4, seen=1,
                              nick='joiner', message='*** joined the chat'),
-            FullMessageEntry(uid=9, mtype=2, seen=1,
+            FullMessageEntry(uid=9, seen=1,
                              nick='leaver', message='*** left the chat')])
 
     def test_history_add(self):
@@ -187,7 +176,7 @@ class TestMessageList(unittest.TestCase):
         self.add_chat1()
         self.add_chat1()
         self.assertEqual(self.ml.get(), [
-            FullMessageEntry(uid=3, mtype=0, seen=3,
+            FullMessageEntry(uid=3, seen=3,
                              nick='tester', message='testing yeah')])
 
     def test_join_reply(self):
@@ -217,9 +206,9 @@ class TestMessageList(unittest.TestCase):
         self.add_chat3()
         self.add_old_reply()
         self.assertEqual(self.ml.get(), [
-            FullMessageEntry(uid=13, mtype=0, seen=1,
+            FullMessageEntry(uid=13, seen=1,
                              nick='vastaamo', message='sitä saa mitä kysyy'),
-            FullMessageEntry(uid=5, mtype=0, seen=1,
+            FullMessageEntry(uid=5, seen=1,
                              nick='mokkeli', message='höh. ei se nyt niin saa olla.')])
 
     def test_old_reply_no_request(self):

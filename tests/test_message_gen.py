@@ -31,8 +31,6 @@ class TestMessageGen(unittest.TestCase):
             )
 
             self.assertIsInstance(msg, ChatRelayMessage)
-            self.assertEqual(msg.msg_type, MessageType.CHAT_RELAY)
-            self.assertEqual(msg.msg_type, 0)
             self.assertEqual(msg.uniq_msg_id, 10)
             self.assertEqual(msg.sender_ip, IPv4Address("1.0.1.1"))
             self.assertEqual(msg.old_message_ids, [1, 2, 3])
@@ -74,8 +72,6 @@ class TestMessageGen(unittest.TestCase):
             )
 
             self.assertIsInstance(msg, JoinRelayMessage)
-            self.assertEqual(msg.msg_type, MessageType.JOIN_RELAY)
-            self.assertEqual(msg.msg_type, 1)
             self.assertEqual(msg.uniq_msg_id, 42)
             self.assertEqual(msg.sender_ip, IPv4Address("5.4.2.1"))
             self.assertEqual(msg.old_message_ids, [10, 20, 30])
@@ -106,8 +102,6 @@ class TestMessageGen(unittest.TestCase):
             )
 
             self.assertIsInstance(msg, LeaveRelayMessage)
-            self.assertEqual(msg.msg_type, MessageType.LEAVE_RELAY)
-            self.assertEqual(msg.msg_type, 2)
             self.assertEqual(msg.uniq_msg_id, 69)
             self.assertEqual(msg.sender_ip, IPv4Address("4.3.3.4"))
             self.assertEqual(msg.old_message_ids, [5, 15, 25])
@@ -130,8 +124,6 @@ class TestMessageGen(unittest.TestCase):
             msg = message_gen.new_message(MessageType.KEEPALIVE_RELAY, ip=IPv4Address("11.1.1.1"))
 
             self.assertIsInstance(msg, KeepaliveRelayMessage)
-            self.assertEqual(msg.msg_type, MessageType.KEEPALIVE_RELAY)
-            self.assertEqual(msg.msg_type, 3)
             self.assertEqual(msg.uniq_msg_id, 666)
             self.assertEqual(msg.sender_ip, IPv4Address("11.1.1.1"))
 
@@ -147,8 +139,6 @@ class TestMessageGen(unittest.TestCase):
             )
 
             self.assertIsInstance(msg, JoinRequestMessage)
-            self.assertEqual(msg.msg_type, MessageType.JOIN_REQUEST)
-            self.assertEqual(msg.msg_type, 128)
             self.assertEqual(msg.uniq_msg_id, 600)
             self.assertEqual(msg.sender_nick, "saunis")
 
@@ -175,8 +165,6 @@ class TestMessageGen(unittest.TestCase):
             )
 
             self.assertIsInstance(msg, JoinReplyMessage)
-            self.assertEqual(msg.msg_type, MessageType.JOIN_REPLY)
-            self.assertEqual(msg.msg_type, 129)
             self.assertEqual(msg.old_message_ids, [1, 2, 3, 4, 5])
             self.assertEqual(msg.ip_addresses, [
                 IPv4Address("10.0.0.1"),
@@ -205,8 +193,6 @@ class TestMessageGen(unittest.TestCase):
             )
 
             self.assertIsInstance(msg, OldRequestMessage)
-            self.assertEqual(msg.msg_type, MessageType.OLD_REQUEST)
-            self.assertEqual(msg.msg_type, 130)
             self.assertEqual(msg.uniq_msg_id, 44444)
 
     def test_old_request_missing_uid(self):
@@ -224,8 +210,6 @@ class TestMessageGen(unittest.TestCase):
             )
 
             self.assertIsInstance(msg, OldReplyMessage)
-            self.assertEqual(msg.msg_type, MessageType.OLD_REPLY)
-            self.assertEqual(msg.msg_type, 131)
             self.assertEqual(msg.old_msg_type, MessageType.CHAT_RELAY)
             self.assertEqual(msg.old_msg_type, 0)
             self.assertEqual(msg.uniq_msg_id, 55)

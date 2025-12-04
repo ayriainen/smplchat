@@ -31,7 +31,6 @@ def new_message(msg_type: MessageType, **kwargs):
         match msg_type:
             case MessageType.CHAT_RELAY:
                 return ChatRelayMessage(
-                    msg_type = MessageType.CHAT_RELAY,
                     uniq_msg_id = uid,
                     sender_ip = kwargs["ip"],
                     old_message_ids = kwargs["msg_list"].latest_ids(limit=50),
@@ -40,7 +39,6 @@ def new_message(msg_type: MessageType, **kwargs):
 
             case MessageType.JOIN_RELAY:
                 return JoinRelayMessage(
-                    msg_type = MessageType.JOIN_RELAY,
                     uniq_msg_id = uid,
                     sender_ip = kwargs["ip"],
                     old_message_ids = kwargs["msg_list"].latest_ids(limit=50),
@@ -48,7 +46,6 @@ def new_message(msg_type: MessageType, **kwargs):
 
             case MessageType.LEAVE_RELAY:
                 return LeaveRelayMessage(
-                    msg_type = MessageType.LEAVE_RELAY,
                     uniq_msg_id = uid,
                     sender_ip = kwargs["ip"],
                     old_message_ids = kwargs["msg_list"].latest_ids(limit=50),
@@ -56,31 +53,26 @@ def new_message(msg_type: MessageType, **kwargs):
 
             case MessageType.KEEPALIVE_RELAY:
                 return KeepaliveRelayMessage(
-                    msg_type=MessageType.KEEPALIVE_RELAY,
                     uniq_msg_id=uid,
                     sender_ip=kwargs["ip"],
                 )
 
             case MessageType.JOIN_REQUEST:
                 return JoinRequestMessage(
-                    msg_type = MessageType.JOIN_REQUEST,
                     uniq_msg_id = uid,
                     sender_nick = kwargs["nick"])
 
             case MessageType.JOIN_REPLY:
                 return JoinReplyMessage(
-                    msg_type = MessageType.JOIN_REPLY,
                     old_message_ids = kwargs["msg_list"].latest_ids(limit=100),
                     ip_addresses = kwargs["client_list"].get() )
 
             case MessageType.OLD_REQUEST:
                 return OldRequestMessage(
-                    msg_type = MessageType.OLD_REQUEST,
                     uniq_msg_id = kwargs["uid"] )
 
             case MessageType.OLD_REPLY:
                 return OldReplyMessage(
-                    msg_type = MessageType.OLD_REPLY,
                     old_msg_type = kwargs["old_type"],
                     uniq_msg_id = kwargs["uid"],
                     sender_nick = kwargs["nick"],

@@ -26,7 +26,7 @@ def packer(m: Message):
                 f"{len(m.old_message_ids)}Q"
                 f"{len(sender_nick)}s"
                 f"{len(msg_text)}s",
-            m.msg_type,					# B - 1 byte
+            MessageType.CHAT_RELAY,			# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
             m.sender_ip.packed,				# 4s- 4 bytes
             len(m.old_message_ids),			# L - 4 bytes
@@ -43,7 +43,8 @@ def packer(m: Message):
             "!BQ4sLL"
                 f"{len(m.old_message_ids)}Q"
                 f"{len(sender_nick)}s",
-            m.msg_type,					# B - 1 byte
+            (MessageType.JOIN_RELAY if isinstance(m, JoinRelayMessage)
+                    else MessageType.LEAVE_RELAY),	# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
             m.sender_ip.packed,				# 4s - 4 bytes
             len(m.old_message_ids),			# L - 4 bytes
@@ -55,7 +56,7 @@ def packer(m: Message):
     if isinstance(m, KeepaliveRelayMessage):
         return pack(
             "!BQ4s",
-            m.msg_type,					# B - 1 byte
+            MessageType.KEEPALIVE_RELAY,		# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
             m.sender_ip.packed)				# L - 4 bytes
 
@@ -64,7 +65,7 @@ def packer(m: Message):
         return pack(
             "!BQL"
                 f"{len(sender_nick)}s",
-            m.msg_type,					# B - 1 byte
+            MessageType.JOIN_REQUEST,			# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
             len(sender_nick),				# L - 4 bytes
 
@@ -78,7 +79,7 @@ def packer(m: Message):
             "!BLL"
                 f"{len(m.old_message_ids)}Q"
                 f"{len(m.ip_addresses*4)}s",
-            m.msg_type,					# B - 1 byte
+            MessageType.JOIN_REPLY,			# B - 1 byte
             len(m.old_message_ids),			# L - 4 bytes
             len(m.ip_addresses),			# L - 4 bytes
 
@@ -88,7 +89,7 @@ def packer(m: Message):
     if isinstance(m, OldRequestMessage):
         return pack(
             "!BQ",
-            m.msg_type,					# B - 1 byte
+            MessageType.OLD_REQUEST,			# B - 1 byte
             m.uniq_msg_id)				# Q - 8 bytes
 
     if isinstance(m, OldReplyMessage):
@@ -98,7 +99,7 @@ def packer(m: Message):
             "!BBQLL"
                 f"{len(sender_nick)}s"
                 f"{len(msg_text)}s",
-            m.msg_type,					# B - 1 byte
+            MessageType.OLD_REPLY,			# B - 1 byte
             m.old_msg_type,				# B - 1 byte
             m.uniq_msg_id,				# Q - 8 bytes
             len(sender_nick),				# L - 4 bytes
@@ -115,7 +116,7 @@ def packer(m: Message):
 
 def unpack_chat_relay_message(data: bytes):
     """ unpacker for chat relay messages """
-    (msg_type,			# B - 1 byte
+    (_,				# B - 1 byte
         uniq_msg_id,		# Q - 8 bytes
         sender_ip,		# L - 4 bytes
         old_msgs_length,	# L - 4 bytes
@@ -136,7 +137,6 @@ def unpack_chat_relay_message(data: bytes):
             f"!{msg_length}s", data, offset=offset)[0].decode()
 
     return ChatRelayMessage(
-        msg_type = msg_type,
         uniq_msg_id = uniq_msg_id,
         sender_ip = IPv4Address(sender_ip),
         old_message_ids = old_message_ids,
@@ -168,7 +168,6 @@ def unpack_joinleave_relay_message(data: bytes):
         ret_type = LeaveRelayMessage
 
     return ret_type(
-        msg_type = msg_type,
         uniq_msg_id = uniq_msg_id,
         sender_ip = IPv4Address(sender_ip),
         old_message_ids = old_message_ids,
@@ -177,7 +176,7 @@ def unpack_joinleave_relay_message(data: bytes):
 
 def unpack_join_request_message(data: bytes):
     """ unpacker for join request messages """
-    (msg_type,			# B - 1 byte
+    (_,				# B - 1 byte
         uniq_msg_id,		# Q - 8 bytes
         nick_length) = (	# L - 4 bytes
             unpack_from("!BQL", data) )
@@ -187,14 +186,13 @@ def unpack_join_request_message(data: bytes):
             f"!{nick_length}s", data, offset=offset)[0].decode()
 
     return JoinRequestMessage(
-        msg_type = msg_type,
         uniq_msg_id = uniq_msg_id,
         sender_nick = sender_nick)
 
 
 def unpack_join_reply_message(data: bytes):
     """ unpacker for chat relay messages """
-    (msg_type,			# B - 1 byte
+    (_,				# B - 1 byte
         old_msgs_length,	# L - 4 bytes
         ip_addrs_length ) = (	# L - 4 bytes
             unpack_from("!BLL", data) )
@@ -208,14 +206,13 @@ def unpack_join_reply_message(data: bytes):
             f"!{ip_addrs_length}L", data, offset=offset)) )
 
     return JoinReplyMessage(
-        msg_type = msg_type,
         old_message_ids = old_message_ids,
         ip_addresses = ip_addresses)
 
 
 def unpack_old_reply_message(data: bytes):
     """ unpacker for chat relay messages """
-    (msg_type,			# B - 1 byte
+    (_,				# B - 1 byte
         old_msg_type,		# B - 1 byte
         uniq_msg_id,		# Q - 8 bytes
         nick_length,		# L - 4 bytes
@@ -231,7 +228,6 @@ def unpack_old_reply_message(data: bytes):
             f"!{msg_length}s", data, offset=offset)[0].decode()
 
     return OldReplyMessage(
-        msg_type = msg_type,
         old_msg_type = old_msg_type,
         uniq_msg_id = uniq_msg_id,
         sender_nick = sender_nick,
@@ -250,12 +246,11 @@ def unpacker(data: bytes):
             return unpack_joinleave_relay_message(data)
 
         case MessageType.KEEPALIVE_RELAY:
-            (msg_type,			# B - 1 byte
+            (_,				# B - 1 byte
                 uniq_msg_id,		# Q - 8 bytes
                 sender_ip ) = (		# 4s - 4 bytes
                     unpack("!BQL", data) )
             return KeepaliveRelayMessage(
-                msg_type = msg_type,
                 uniq_msg_id = uniq_msg_id,
                 sender_ip = IPv4Address(sender_ip))
 
@@ -266,11 +261,10 @@ def unpacker(data: bytes):
             return unpack_join_reply_message(data)
 
         case MessageType.OLD_REQUEST:
-            (msg_type,			# B - 1 byte
+            (_,				# B - 1 byte
                 uniq_msg_id ) =	(	# Q - 8 bytes
                     unpack("!BQ", data) )
             return OldRequestMessage(
-                msg_type = msg_type,
                 uniq_msg_id = uniq_msg_id)
 
         case MessageType.OLD_REPLY:

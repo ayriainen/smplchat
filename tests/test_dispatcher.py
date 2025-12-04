@@ -16,7 +16,6 @@ class TestDispatcher(unittest.TestCase):
         sock_instance = MagicMock()
         mock_socket.return_value.__enter__.return_value = sock_instance
         msg = ChatRelayMessage(
-            msg_type=MessageType.CHAT_RELAY,
             uniq_msg_id=12,
             sender_ip=666,
             old_message_ids=[],
@@ -49,7 +48,6 @@ class TestDispatcher(unittest.TestCase):
         mock_packer.return_value = b"BLABLA"
 
         msg = ChatRelayMessage(
-            msg_type=MessageType.CHAT_RELAY,
             uniq_msg_id=12,
             sender_ip=666,
             old_message_ids=[],

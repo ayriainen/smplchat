@@ -5,7 +5,7 @@ from smplchat.listener import Listener
 from smplchat.message_list import MessageList, initial_messages
 from smplchat.dispatcher import Dispatcher
 from smplchat.tui import UserInterface
-from smplchat.message import new_message, MessageType, is_relay_message
+from smplchat.message import *
 from smplchat.client_list import ClientList, KeepaliveList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
@@ -41,7 +41,7 @@ def main():
             # Process input form listener
             for rx_msg, remote_ip in listener.get_messages():
                 msg = unpacker(rx_msg)
-                if msg.msg_type == MessageType.KEEPALIVE_RELAY:
+                if isinstance(msg, KeepaliveRelayMessage):
                     if keepalive_list.seen_count(msg.uniq_msg_id) < 2:
                         dispatcher.send(msg, client_list.get(exclude=remote_ip))
                     keepalive_list.add(msg.uniq_msg_id)
@@ -57,7 +57,7 @@ def main():
                                 msg, client_list.get(exclude=remote_ip))
                         msg_list.add(msg) # add or update seend count
 
-                elif msg.msg_type == MessageType.JOIN_REQUEST:
+                elif isinstance(msg, JoinRequestMessage):
                     msg_list.sys_message(
                             f"*** Join request from <{msg.sender_nick}>, "
                             f"IP: {str(remote_ip)}")
@@ -73,16 +73,16 @@ def main():
                             msg_list=msg_list )
                     dispatcher.send(out_msg, client_list.get())
 
-                elif msg.msg_type == MessageType.JOIN_REPLY:
+                elif isinstance(msg, JoinReplyMessage):
                     msg_list.sys_message(
                             f"*** Join accepted {str(remote_ip)} ")
                     client_list.add(remote_ip)
                     client_list.add_list(msg.ip_addresses)
 
-                elif msg.msg_type == MessageType.OLD_REPLY:
+                elif isinstance(msg, OldReplyMessage):
                     msg_list.add(msg)
 
-                elif msg.msg_type == MessageType.OLD_REQUEST:
+                elif isinstance(msg, OldRequestMessage):
                     found = msg_list.get_by_uid(msg.uniq_msg_id)
                     if found is not None:
                         msg = new_message(MessageType.OLD_REPLY,
