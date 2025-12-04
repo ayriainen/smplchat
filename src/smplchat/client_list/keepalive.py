@@ -18,7 +18,7 @@ class KeepaliveList:
     def cleanup(self):
         """ cleans up too old entries """
         now = int(time())
-        for uid, entry in self.__entries.items():
+        for uid, entry in list(self.__entries.items()):
             if now - entry.addtime > NODE_TIMEOUT:
                 del self.__entries[uid]
 
