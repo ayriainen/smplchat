@@ -86,7 +86,8 @@ def main():
                     found = msg_list.get_by_uid(msg.uniq_msg_id)
                     if found is not None:
                         msg = new_message(MessageType.OLD_REPLY,
-                                old_type=found.mtype, uid=msg.uniq_msg_id,
+                                old_type=MessageType.CHAT_RELAY,
+                                uid=msg.uniq_msg_id,
                                 nick=found.nick, text=found.message)
                         dispatcher.send(msg, [remote_ip])
             client_list.update()
