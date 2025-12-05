@@ -9,7 +9,7 @@ authors = [
 ]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/viljami-ilola-helsinki-fi/smplchat"
+repository = "https://github.com/smplchat/smplchat"
 requires-python = ">=3.10"
 packages = [{include = "smplchat", from = "src"}]
 dependencies = [
