@@ -25,7 +25,7 @@ Run in terminal from the project folder.
 
 Install via:
 ```
-poetry install
+PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring poetry install
 ```
 And if you want to disclude the dev dependencies, give it the flag " --without dev".
 
