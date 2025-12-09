@@ -193,7 +193,7 @@ class UserInterface:
         _, info_w = self._windows.info_win.getmaxyx()
         try:
             self._windows.info_win.hline(0, 0, "-", info_w - 1)
-            self._windows.info_win.addnstr(1, 0, "/help + <enter> - show commands", info_w - 1)
+            self._windows.info_win.addnstr(1, 0, "/help  -  show commands", info_w - 1)
             self._windows.info_win.hline(2, 0, "-", info_w - 1)
         except curses.error:
             pass
