@@ -1,6 +1,6 @@
 # smplchat
 
-This project is a group work for master level course Distributed Systems at University of Helsinki. The main goal of this project is to design a large scale distributed system that has a global state, provides data consistency and synchronization, is fault tolerant and scalable. The implementation demonstrates these concepts of the designed system at small scale.
+This project is a group work for master level course Distributed Systems at University of Helsinki. The main goal of this project is to design a large scale distributed chat system that has a global state, provides data consistency and synchronization, is fault tolerant and scalable.
 
 ```mermaid
 graph TB
@@ -40,18 +40,18 @@ And then run app normally:
 smplchat
 ```
 
-## Developement Environment
+## Development Environment
 
 ### Installation
 
-Developement environment with dependencies can be installed with poetry:
+Development environment with dependencies can be installed with poetry:
 ```
 poetry install
 ```
 
 ### Running
 
-Run the app inside developement environment via:
+Run the app inside development environment via:
 ```
 poetry run smplchat
 ```
@@ -63,7 +63,7 @@ Pytest and other tools can be run like:
 poetry run pytest
 ```
 
-Developement related commands like pytest, coverage, pylint can also be run through `dev.sh` which is also used in the GitHub workflow.
+Development related commands like pytest, coverage, pylint can also be run through `dev.sh` which is also used in the GitHub workflow.
 
 
 ### Operating multiple clients locally
