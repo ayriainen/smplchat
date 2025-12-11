@@ -36,6 +36,10 @@ class ClientList:
             return peers
         return sample(peers, n)
 
+    def get_all(self) -> list[IPv4Address]:
+        """ Returns all peers """
+        return list(self.__iplist.keys())
+
     # unused remove and clear, undo commenting if needed
     #def remove(self, ip_addr):
     #    """ Remove specific ip from the list """

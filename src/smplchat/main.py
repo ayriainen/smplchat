@@ -140,7 +140,11 @@ def main():
                 break
 
             elif intxt.startswith("/nick"):
-                new_nick = intxt.split()[1]
+                new_nick = None
+                try:
+                    new_nick = intxt.split()[1]
+                except IndexError:
+                    msg_list.sys_message("*** Nick needs a name")
                 msg = new_message(
                         msg_type=MessageType.CHAT_RELAY, nick="system",
                         text=f"*** <{nick}> is now known as <{new_nick}>",
@@ -153,11 +157,14 @@ def main():
                 initial_messages(msg_list)
 
             elif intxt.startswith("/peers"):
-                peers = client_list.get()
+                peers = client_list.get_all()
                 if not peers:
                     msg_list.sys_message("*** No known peers")
                 else:
-                    peer_str = ", ".join(str(ip) for ip in peers) # only ips for now
+                    limit = 30
+                    peer_str = ", ".join(str(ip) for ip in peers[:limit]) # only ips for now
+                    if len(peers) > limit:
+                        peer_str += f", ... (+{len(peers) - limit} more)"
                     msg_list.sys_message(
                         f"*** Known peers ({len(peers)}): {peer_str}"
                     )
