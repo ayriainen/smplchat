@@ -67,6 +67,14 @@ class MessageList:
             self.__messages = self.__messages[-MAX_MESSAGES:]
             self.updated = True
 
+    def clear_user_messages(self):
+        """ Remove chat history but keep system messages (for joining a chat) """
+        self.__messages = [
+            m for m in self.__messages
+            if isinstance(m, SystemMessageEntry)
+        ]
+        self.updated = True
+
     def __add_unseen_history(self, uid: int, history: list[int]):
         """ __add_unseen_history - adds unseen messages to
             the message list in corrent order and place. """
@@ -176,7 +184,7 @@ class MessageList:
         return 0
 
     def get(self):
-        """ get - Gets current list (currently just for tests?) """
+        """ get - Gets current list """
         return self.__messages
 
     def latest_ids(self, limit=None):

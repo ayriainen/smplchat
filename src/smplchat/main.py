@@ -163,6 +163,8 @@ def main():
                     msg_list.sys_message(
                             f"*** Malformed address {intxt.split()[1]}")
                 if remote_ip:
+                    if not client_list.get(): # clear messages before join if not already joined
+                        msg_list.clear_user_messages()
                     msg_list.sys_message(
                             f"*** Join request sent to {str(remote_ip)}")
                     dispatcher.send(msg, [remote_ip])
