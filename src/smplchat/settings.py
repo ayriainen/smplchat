@@ -7,6 +7,7 @@ from ipaddress import IPv4Address
 
 NODE_TIMEOUT = 300	# After 300s we can assume connection is lost
 KEEPALIVE_INTERVAL = 2 # keepalive's interval in seconds
+CLEANUP_INTERVAL = 60 # how often list cleanup (msg, keepalive, client) occurs in seconds
 LATEST_LIMIT = 50 # latest msgs spread with relays, note: JOIN_REPLY is multiplier of this
 MAX_MESSAGES = 2000 # max number of messages in history, trimmed to this every NODE_TIMEOUT timer
 

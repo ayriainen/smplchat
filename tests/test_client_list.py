@@ -26,22 +26,6 @@ class TestClientList(unittest.TestCase):
         self.cl.add_list([3, 4])
         self.assertEqual(self.cl.get(4), [1, 2, 3, 4])
 
-    def test_remove(self):
-        self.cl = ClientList(0)
-        self.cl.add_list([1, 2, 3])
-        self.assertEqual(self.cl.get(3), [1, 2, 3])
-        self.cl.remove(2)
-        self.assertEqual(self.cl.get(), [1, 3])
-        self.cl.remove(4)
-        self.assertEqual(self.cl.get(), [1, 3])
-
-    def test_clear(self):
-        self.cl = ClientList(0)
-        self.cl.add_list([1, 2, 3])
-        self.assertEqual(self.cl.get(3), [1, 2, 3])
-        self.cl.clear()
-        self.assertEqual(self.cl.get(), [])
-
     def test_get(self):
         self.cl = ClientList(0)
         self.assertEqual(self.cl.get(), [])

@@ -20,15 +20,7 @@ class ClientList:
         for x in ip_addresses:
             self.add(x)
 
-    def remove(self, ip_addr):
-        """ Just removes ip from the list. For example on leave """
-        self.__iplist.pop(ip_addr, None)
-
-    def clear(self):
-        """ Removes all ips from the list. """
-        self.__iplist.clear()
-
-    def update(self):
+    def cleanup(self):
         """ Cleans up ip addresses that we havent heard of in some time """
         cur_ts = int(time())
         for ip_addr, ts in list(self.__iplist.items()):

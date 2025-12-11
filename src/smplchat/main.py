@@ -18,8 +18,8 @@ from smplchat.client_list import ClientList, KeepaliveList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
 from smplchat.settings import (
-        NODE_TIMEOUT,
         KEEPALIVE_INTERVAL,
+        CLEANUP_INTERVAL,
         SMPLCHAT_NICK,
         SMPLCHAT_JOIN)
 
@@ -126,7 +126,6 @@ def main():
                                 uid=msg.uniq_msg_id,
                                 nick=found.nick, text=found.message)
                         dispatcher.send(msg, [remote_ip])
-            client_list.update()
 
             # Process input from UI
             intxt = tui.update(nick)
@@ -194,11 +193,11 @@ def main():
                 last_keepalive = now
 
             # maintenance
-            if now - last_maintenance >= NODE_TIMEOUT:
+            if now - last_maintenance >= CLEANUP_INTERVAL:
                 keepalive_list.cleanup()
                 msg_list.cleanup()
+                client_list.cleanup()
                 last_maintenance = now
-            client_list.update()
     finally:
         # exit cleanup
         listener.stop()
