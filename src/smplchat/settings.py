@@ -5,6 +5,8 @@ from ipaddress import IPv4Address
 
 # adjust these constants to your liking to change system behavior
 
+GOSSIP_FANOUT = 2 # how many random peers gossipped to
+RELAY_SEEN_LIMIT = 2 # seen limit for a chat/join/leave/keepalive relay
 NODE_TIMEOUT = 300	# After 300s we can assume connection is lost
 KEEPALIVE_INTERVAL = 2 # keepalive's interval in seconds
 CLEANUP_INTERVAL = 60 # how often list cleanup (msg, keepalive, client) occurs in seconds

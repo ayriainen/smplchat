@@ -18,6 +18,8 @@ from smplchat.client_list import ClientList, KeepaliveList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
 from smplchat.settings import (
+        GOSSIP_FANOUT,
+        RELAY_SEEN_LIMIT,
         KEEPALIVE_INTERVAL,
         CLEANUP_INTERVAL,
         SMPLCHAT_NICK,
@@ -73,20 +75,20 @@ def main():
                 # keepalive relay
                 if isinstance(msg, KeepaliveRelayMessage):
                     client_list.add(msg.sender_ip) # keepalive sender is alive
-                    if keepalive_list.seen_count(msg.uniq_msg_id) < 2:
-                        dispatcher.send(msg,client_list.get(exclude=remote_ip))
+                    if keepalive_list.seen_count(msg.uniq_msg_id) < RELAY_SEEN_LIMIT:
+                        dispatcher.send(msg, client_list.get(GOSSIP_FANOUT, exclude=remote_ip))
                     keepalive_list.add(msg.uniq_msg_id)
 
                 # chat/join/leave relay
                 elif is_relay_message(msg):
                     client_list.add(remote_ip) # relayer is alive
                     seen = msg_list.is_seen(msg.uniq_msg_id)
-                    if not seen or seen < 2: # resend first 2 times
+                    if not seen or seen < RELAY_SEEN_LIMIT: # resend first 2 times
                         # orginal sender is alive so add to the list
                         client_list.add(msg.sender_ip)
                         # relay messages to other peers
                         dispatcher.send(
-                                msg, client_list.get(exclude=remote_ip))
+                                msg, client_list.get(GOSSIP_FANOUT, exclude=remote_ip))
                         msg_list.add(msg) # add or update seend count
 
                 # join request
@@ -202,7 +204,7 @@ def main():
 
             # keepalive check and dispatch
             if now - last_keepalive >= KEEPALIVE_INTERVAL:
-                peers = client_list.get()
+                peers = client_list.get(GOSSIP_FANOUT)
                 if peers:
                     ka_msg = new_message(
                         msg_type=MessageType.KEEPALIVE_RELAY,
