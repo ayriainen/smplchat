@@ -3,7 +3,14 @@ from os import getenv
 from sys import stderr
 from ipaddress import IPv4Address
 
-# these "if" constants aren't generally to be modified unlike constants at bottom
+# adjust these constants to your liking to change system behavior
+
+NODE_TIMEOUT = 300	# After 300s we can assume connection is lost
+KEEPALIVE_INTERVAL = 2 # keepalive's interval in seconds
+LATEST_LIMIT = 50 # latest msgs spread with relays, note: JOIN_REPLY is multiplier of this
+MAX_MESSAGES = 2000 # max number of messages in history, trimmed to this every NODE_TIMEOUT timer
+
+# the following "if" constants aren't generally to be modified unlike above
 # they may simply get their value from the env
 
 if "DEBUG" not in globals():
@@ -33,9 +40,3 @@ if "SMPLCHAT_JOIN" not in globals():
         SMPLCHAT_JOIN = IPv4Address(getenv("SMPLCHAT_JOIN"))
     except ValueError:
         SMPLCHAT_JOIN = None
-
-# adjust these bottom constants to your liking to change system behavior
-
-NODE_TIMEOUT = 300	# After 300s we can assume connection is lost
-KEEPALIVE_INTERVAL = 2 # keepalive's interval in seconds
-LATEST_LIMIT = 50 # latest msgs spread with relays, note: JOIN_REPLY is multiplier of this

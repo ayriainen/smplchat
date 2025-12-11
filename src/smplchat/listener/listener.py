@@ -22,11 +22,6 @@ class Listener:
         self.__thread = threading.Thread(target=self.__listener_loop, name="listener")
         self.__thread.start()
 
-    @property
-    def sock(self):
-        """Let dispatcher use the same socket for peer discovery."""
-        return self._sock
-
     def __listener_loop(self):
         while not self.__stop:
             try:

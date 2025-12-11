@@ -12,6 +12,7 @@ from smplchat.message import (
     OldReplyMessage)
 from smplchat.utils import (
     dprint, get_time_from_uid)
+from smplchat.settings import MAX_MESSAGES
 
 
 @dataclass
@@ -60,8 +61,11 @@ class MessageList:
         self.__messages: List[MessageEntry] = []
         self.updated = False
 
-    def __update(self):
-        """ __update - internal command that for example cut too long list"""
+    def cleanup(self):
+        """ cleanup - command that for example cuts a list that's too long"""
+        if len(self.__messages) > MAX_MESSAGES:
+            self.__messages = self.__messages[-MAX_MESSAGES:]
+            self.updated = True
 
     def __add_unseen_history(self, uid: int, history: list[int]):
         """ __add_unseen_history - adds unseen messages to
@@ -78,14 +82,13 @@ class MessageList:
                 new_entries = True
         return new_entries
 
-
     def __update_message(self, uid, nick, message):
         pos = self.find(uid)
         if pos is not None:
             entry = self.__messages[pos]
 
             if isinstance(entry, (WaitingMessageEntry, GivenUpMessageEntry)):
-                self.__messages[pos] = self.__messages[pos] = FullMessageEntry(
+                self.__messages[pos] = FullMessageEntry(
                     uid=uid,
                     seen=1,
                     nick=nick,
@@ -173,8 +176,7 @@ class MessageList:
         return 0
 
     def get(self):
-        """ get - Gets current list """
-        self.__update()
+        """ get - Gets current list (currently just for tests?) """
         return self.__messages
 
     def latest_ids(self, limit=None):

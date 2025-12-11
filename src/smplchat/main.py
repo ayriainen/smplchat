@@ -18,6 +18,7 @@ from smplchat.client_list import ClientList, KeepaliveList
 from smplchat.packet_mangler import unpacker
 from smplchat.utils import get_my_ip, dprint
 from smplchat.settings import (
+        NODE_TIMEOUT,
         KEEPALIVE_INTERVAL,
         SMPLCHAT_NICK,
         SMPLCHAT_JOIN)
@@ -47,6 +48,7 @@ def main():
     keepalive_list = KeepaliveList()
     dispatcher = Dispatcher() # dispatch sockets
     last_keepalive = time()
+    last_maintenance = time()
 
     initial_messages(msg_list) # adds some helpful messages to the list
     msg_list.sys_message( f"*** Your IP: {str(self_ip)}" )
@@ -178,8 +180,10 @@ def main():
                 msg = new_message(MessageType.OLD_REQUEST, uid=waiting_message)
                 dispatcher.send(msg,client_list.get(1))
 
+            now = time()
+
             # keepalive check and dispatch
-            if time() - last_keepalive >= KEEPALIVE_INTERVAL:
+            if now - last_keepalive >= KEEPALIVE_INTERVAL:
                 peers = client_list.get()
                 if peers:
                     ka_msg = new_message(
@@ -187,10 +191,13 @@ def main():
                         ip=self_ip,
                     )
                     dispatcher.send(ka_msg, peers)
-                last_keepalive = time()
+                last_keepalive = now
 
             # maintenance
-            keepalive_list.cleanup()
+            if now - last_maintenance >= NODE_TIMEOUT:
+                keepalive_list.cleanup()
+                msg_list.cleanup()
+                last_maintenance = now
             client_list.update()
     finally:
         # exit cleanup
