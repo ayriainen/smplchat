@@ -105,7 +105,7 @@ def main():
                             nick=msg.sender_nick, ip=remote_ip,
                             msg_list=msg_list )
                     msg_list.add(out_msg)
-                    dispatcher.send(out_msg, client_list.get())
+                    dispatcher.send(out_msg, client_list.get(GOSSIP_FANOUT))
 
                 # join reply to our join request
                 elif isinstance(msg, JoinReplyMessage):
@@ -135,7 +135,7 @@ def main():
             elif intxt.startswith("/quit"):
                 msg = new_message(msg_type=MessageType.LEAVE_RELAY, nick=nick,
                         ip=self_ip, msg_list=msg_list)
-                dispatcher.send(msg, client_list.get())
+                dispatcher.send(msg, client_list.get(GOSSIP_FANOUT))
                 tui.stop()
                 break
 
@@ -151,7 +151,7 @@ def main():
                         ip=self_ip, msg_list=msg_list )
                 nick = new_nick
                 msg_list.add(msg)
-                dispatcher.send(msg, client_list.get())
+                dispatcher.send(msg, client_list.get(GOSSIP_FANOUT))
 
             elif intxt.startswith("/help"):
                 initial_messages(msg_list)
@@ -190,7 +190,7 @@ def main():
                 msg = new_message(msg_type=MessageType.CHAT_RELAY, nick=nick,
                         text=intxt, ip=self_ip, msg_list=msg_list)
                 msg_list.add(msg)
-                dispatcher.send(msg, client_list.get())
+                dispatcher.send(msg, client_list.get(GOSSIP_FANOUT))
 
             # Fetch missing messages from peers
             waiting_message = msg_list.get_waiting_message()
