@@ -133,6 +133,7 @@ def main():
                 pass
 
             elif intxt.startswith("/quit"):
+                # sends leave relay message and quits app
                 msg = new_message(msg_type=MessageType.LEAVE_RELAY, nick=nick,
                         ip=self_ip, msg_list=msg_list)
                 dispatcher.send(msg, client_list.get(GOSSIP_FANOUT))
@@ -140,6 +141,7 @@ def main():
                 break
 
             elif intxt.startswith("/nick"):
+                # changes nick and send chat relays message as system
                 new_nick = None
                 try:
                     new_nick = intxt.split()[1]
