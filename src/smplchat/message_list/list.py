@@ -10,8 +10,7 @@ from smplchat.message import (
     LeaveRelayMessage,
     JoinReplyMessage,
     OldReplyMessage)
-from smplchat.utils import (
-    dprint, get_time_from_uid)
+from smplchat.utils import dprint, get_time_from_uid
 from smplchat.settings import MAX_MESSAGES
 
 
@@ -33,17 +32,28 @@ class FullMessageEntry:
 
 @dataclass
 class WaitingMessageEntry:
+    """ Message needs to be requested
+        
+        fetch_count - how many times we have already tried
+        last_tried - last time that old message request was sent
+    """
     uid: int
     fetch_count: int
     last_tried: datetime
 
 @dataclass
 class GivenUpMessageEntry:
+    """ Message that we no longer try to request
+    """
     uid: int
 
 
 @dataclass
 class SystemMessageEntry:
+    """ System message that is only intented for user information
+    
+        timestamp - only for user information
+    """
     message: str
     timestamp: datetime
 
@@ -85,12 +95,15 @@ class MessageList:
             return False
         for rcv_uid in history:
             if self.find(rcv_uid) is None:
-                self.__messages.insert(pos, WaitingMessageEntry(rcv_uid, 0, datetime.now()))
+                self.__messages.insert(
+                        pos,
+                        WaitingMessageEntry(rcv_uid, 0, datetime.now()))
                 pos += 1
                 new_entries = True
         return new_entries
 
     def __update_message(self, uid, nick, message):
+        """ helper that tries to update entry """
         pos = self.find(uid)
         if pos is not None:
             entry = self.__messages[pos]
@@ -103,7 +116,7 @@ class MessageList:
                     message=message)
                 self.updated = True
                 return True
-            elif isinstance(entry, FullMessageEntry):
+            if isinstance(entry, FullMessageEntry):
                 seen = entry.seen
                 self.__messages[pos] = FullMessageEntry(
                     uid=entry.uid,
@@ -117,9 +130,9 @@ class MessageList:
         """ generates message to be diplayed according message type """
         if isinstance(msg, (OldReplyMessage, ChatRelayMessage)):
             return msg.msg_text
-        elif isinstance(msg, JoinRelayMessage):
+        if isinstance(msg, JoinRelayMessage):
             return "*** joined the chat"
-        elif isinstance(msg, LeaveRelayMessage):
+        if isinstance(msg, LeaveRelayMessage):
             return "*** left the chat"
         return ""
 
@@ -151,8 +164,12 @@ class MessageList:
             return True
 
         if isinstance(msg, JoinReplyMessage):
-            waiting_for = map(lambda x: WaitingMessageEntry(uid=x, last_tried=datetime.now(), fetch_count=0),
-                              msg.old_message_ids)
+            waiting_for = map(
+                    lambda x: WaitingMessageEntry(
+                            uid=x,
+                            last_tried=datetime.now(),
+                            fetch_count=0),
+                    msg.old_message_ids)
             self.__messages += waiting_for
             self.sys_message("*** Join request successful")
             self.updated = True
@@ -164,7 +181,8 @@ class MessageList:
 
     def sys_message(self, text):
         """ Appends system message to the end of message list"""
-        self.__messages.append(SystemMessageEntry(message=text, timestamp=datetime.now()))
+        self.__messages.append(
+                SystemMessageEntry(message=text, timestamp=datetime.now()))
         self.updated = True
 
     def find(self, uid: int):
@@ -189,7 +207,8 @@ class MessageList:
 
     def latest_ids(self, limit=None):
         """Returns latest IDs and has a limit function."""
-        uid_list = [x.uid for x in self.__messages if isinstance(x, FullMessageEntry)]
+        uid_list = [(x.uid
+                for x in self.__messages if isinstance(x, FullMessageEntry))]
         if limit is None or limit >= len(uid_list):
             return uid_list
         return uid_list[-limit:]
@@ -202,7 +221,8 @@ class MessageList:
             return msg.last_tried < (datetime.now() - timedelta(seconds=1))
 
         e = enumerate(self.__messages)
-        waiting_messages: list[tuple[int, WaitingMessageEntry]] = list(filter(__can_be_requested, e))
+        waiting_messages: list[tuple[int, WaitingMessageEntry]] = (
+                list(filter(__can_be_requested, e)))
         if not waiting_messages:
             return None
         last = waiting_messages[-1]
@@ -230,7 +250,7 @@ class MessageList:
             if isinstance(msg, GivenUpMessageEntry):
                 return "Failed to fetch message"
             if isinstance(msg, SystemMessageEntry):
-                time_str = (msg.timestamp.strftime("%H:%M:%S"))
+                time_str = msg.timestamp.strftime("%H:%M:%S")
                 return f"[{time_str}] [System] {msg.message}"
             return None
 
