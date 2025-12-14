@@ -20,8 +20,8 @@ from smplchat.settings import (
         RELAY_SEEN_LIMIT,
         KEEPALIVE_INTERVAL,
         CLEANUP_INTERVAL,
-        SMPLCHAT_NICK,
-        SMPLCHAT_JOIN)
+        NICK,
+        JOIN)
 
 def main():
     """ main - the entry point to the application """
@@ -32,8 +32,8 @@ def main():
     dprint(f"INFO: Got ip-address {str(self_ip)}")
 
     # prompt nickname, use env if set
-    if SMPLCHAT_NICK:
-        nick = SMPLCHAT_NICK
+    if NICK:
+        nick = NICK
     else:
         try:
             nick = input("Enter nickname for chat: ").strip() or "anon"
@@ -54,11 +54,11 @@ def main():
     msg_list.sys_message( f"*** Your IP: {str(self_ip)}" )
 
     # autojoin ip if env for it set
-    if SMPLCHAT_JOIN:
-        msg_list.sys_message(f"*** Join request sent to {str(SMPLCHAT_JOIN)}")
+    if JOIN:
+        msg_list.sys_message(f"*** Join request sent to {str(JOIN)}")
         dispatcher.send(
                 new_message(msg_type=MessageType.JOIN_REQUEST, nick=nick),
-                [SMPLCHAT_JOIN])
+                [JOIN])
 
     tui = UserInterface(msg_list, nick)
 
@@ -81,7 +81,7 @@ def main():
                 elif is_relay_message(msg):
                     client_list.add(remote_ip) # relayer is alive
                     # resend first 2 times
-                    if msg_list.seen_count(msg.uniq_msg_id) < RELAY_SEEN_LIMIT: 
+                    if msg_list.seen_count(msg.uniq_msg_id) < RELAY_SEEN_LIMIT:
                         # original sender is alive so add to the list
                         client_list.add(msg.sender_ip)
                         # relay messages to other peers

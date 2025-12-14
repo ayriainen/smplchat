@@ -152,7 +152,7 @@ class TestMessageGen(unittest.TestCase):
             mock_msg_list.latest_ids.return_value = [1, 2, 3, 4, 5]
 
             mock_client_list = Mock()
-            mock_client_list.get.return_value = [
+            mock_client_list.get_all.return_value = [
                 IPv4Address("10.0.0.1"),
                 IPv4Address("10.0.0.2"),
                 IPv4Address("10.0.0.3")

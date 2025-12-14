@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock, call
 
 from smplchat.udp_comms import Dispatcher
 from smplchat.message import ChatRelayMessage, MessageType
-from smplchat.settings import SMPLCHAT_PORT
+from smplchat.settings import PORT
 
 class TestDispatcher(unittest.TestCase):
 
@@ -34,8 +34,8 @@ class TestDispatcher(unittest.TestCase):
         mock_packer.assert_has_calls([call(msg), call(msg)])
         mock_socket.assert_called_once()
         expected_calls = [
-            (b"BLABLA", ("127.0.0.1", SMPLCHAT_PORT)),
-            (b"BLABLA", ("8.8.8.8", SMPLCHAT_PORT)),
+            (b"BLABLA", ("127.0.0.1", PORT)),
+            (b"BLABLA", ("8.8.8.8", PORT)),
         ]
         actual_calls = [c.args for c in sock_instance.sendto.call_args_list]
         self.assertEqual(expected_calls, actual_calls)

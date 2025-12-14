@@ -65,7 +65,7 @@ def new_message(msg_type: MessageType, **kwargs):
             case MessageType.JOIN_REPLY:
                 return JoinReplyMessage(
                     old_message_ids = kwargs["msg_list"].latest_ids(limit=LATEST_LIMIT * 2),
-                    ip_addresses = kwargs["client_list"].get() )
+                    ip_addresses = kwargs["client_list"].get_all() )
 
             case MessageType.OLD_REQUEST:
                 return OldRequestMessage(
