@@ -14,7 +14,6 @@ settings = {
 "GOSSIP_FANOUT": (int, 2),	# how many random peers gossipped to
 "RELAY_SEEN_LIMIT": (int, 2),	# seen limit for a chat/join/leave/keepalive relay
 
-
 # timeout settings (seconds)
 "NODE_TIMEOUT": (int, 300),	# After 300s we can assume connection is lost
 "KEEPALIVE_INTERVAL": (int, 2),	# keepalive's interval
@@ -23,7 +22,6 @@ settings = {
 # message history settings
 "LATEST_LIMIT": (int, 50),	# latest msgs spread with relays, also affects JOIN_REPLY
 "MAX_MESSAGES": (int, 2000),	# max number of messages in history, can be >2000 before cleanup
-
 
 # optional overrides mainy for testing (leave as is to use default behaviour)
 "DEBUG": (str, None),		# set to something to print out DEBUG information to stderr
