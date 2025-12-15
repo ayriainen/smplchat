@@ -1,6 +1,6 @@
 # smplchat
 
-This project is a group work for master level course Distributed Systems at University of Helsinki. The main goal of this project is to design a large scale distributed chat system that has a global state, provides data consistency and synchronization, is fault tolerant and scalable.
+This project demonstrates that a fully distributed, fault-tolerant chat system can be built with a simple Gossip-style messaging algorithm and UDP networking.
 
 ```mermaid
 graph TB
